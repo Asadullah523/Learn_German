@@ -351,6 +351,20 @@ export default function LessonView() {
           color: var(--text-muted);
           text-transform: uppercase;
           font-size: 0.875rem;
+          background-color: var(--background);
+        }
+
+        @media (max-width: 768px) {
+          .lesson-table th, .lesson-table td {
+            padding: 0.5rem; /* Reduced padding for mobile */
+            font-size: 0.875rem; /* Smaller font for mobile */
+            word-break: break-word; /* Force wrapping */
+            hyphens: auto;
+          }
+          
+          .lesson-table th {
+            font-size: 0.75rem;
+          }
         }
 
         .info-box {
