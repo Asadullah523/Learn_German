@@ -183,6 +183,16 @@ export default function LessonView() {
           max-width: 800px;
           margin: 0 auto;
           padding-bottom: 4rem;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+          .lesson-view {
+            max-width: 100%;
+            padding: 0;
+            padding-bottom: 2rem;
+          }
         }
 
         .recap-section {
@@ -223,6 +233,24 @@ export default function LessonView() {
           gap: var(--spacing-lg);
         }
 
+        .dialogue-bubble {
+          max-width: 80%;
+          padding: var(--spacing-md);
+          border-radius: var(--radius-lg);
+          background: var(--background);
+          border: 1px solid var(--border);
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+          .dialogue-bubble {
+            max-width: 92%;
+            padding: var(--spacing-sm);
+          }
+        }
+
         .back-btn {
           padding: var(--spacing-sm);
           border-radius: 50%;
@@ -253,11 +281,36 @@ export default function LessonView() {
 
         .content-block {
           padding: var(--spacing-xl);
+          max-width: 100%;
+          box-sizing: border-box;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+          .content-block {
+            padding: var(--spacing-md);
+          }
         }
 
         .vocab-list {
           display: grid;
           gap: var(--spacing-md);
+        }
+
+        @media (max-width: 640px) {
+          .vocab-list {
+            grid-template-columns: 1fr;
+          }
+          
+          .vocab-item {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+          }
+          
+          .vocab-main {
+            margin-bottom: var(--spacing-xs);
+          }
         }
 
         .vocab-item {
@@ -269,81 +322,22 @@ export default function LessonView() {
           border-radius: var(--radius-md);
         }
 
-        .vocab-main {
-          display: flex;
-          flex-direction: column;
-        }
+        /* ... (existing styles) ... */
 
-        .vocab-de {
-          font-weight: bold;
-          color: var(--primary);
-          font-size: 1.1rem;
-        }
-
-        .vocab-pronunciation {
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          font-style: italic;
-        }
-
-        .vocab-ctx {
-          font-size: 0.875rem;
-          color: var(--text-muted);
-          background: var(--surface);
-          padding: 2px 8px;
-          border-radius: 4px;
-        }
-
-        /* Dialogue Styles */
-        .dialogue-container {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-md);
-        }
-
-        .dialogue-line {
-          display: flex;
-          width: 100%;
-        }
-
-        .dialogue-left { justify-content: flex-start; }
-        .dialogue-right { justify-content: flex-end; }
-
-        .dialogue-bubble {
-          max-width: 80%;
-          padding: var(--spacing-md);
-          border-radius: var(--radius-lg);
-          background: var(--background);
+        .table-container {
+          max-width: 100%;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          margin-bottom: var(--spacing-md);
+          border-radius: var(--radius-md);
           border: 1px solid var(--border);
-        }
-
-        .dialogue-right .dialogue-bubble {
-          background: rgba(79, 70, 229, 0.1);
-          border-color: rgba(79, 70, 229, 0.2);
-        }
-
-        .dialogue-speaker {
-          font-size: 0.75rem;
-          font-weight: bold;
-          color: var(--text-muted);
-          margin-bottom: 4px;
-        }
-
-        .dialogue-text-de {
-          font-weight: 600;
-          font-size: 1.05rem;
-          margin-bottom: 2px;
-        }
-
-        .dialogue-text-en {
-          font-size: 0.9rem;
-          color: var(--text-muted);
-          font-style: italic;
+          box-sizing: border-box;
         }
 
         .lesson-table {
           width: 100%;
           border-collapse: collapse;
+          /* Removed min-width: 500px that was causing overflow */
         }
 
         .lesson-table th, .lesson-table td {

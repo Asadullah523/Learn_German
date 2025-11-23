@@ -5,8 +5,8 @@ export const curriculum = {
   units: [
     {
       id: "ch1",
-      title: "Chapter 1: The German Alphabet & Pronunciation",
-      description: "Master the sounds of German, including Umlauts and special characters.",
+      title: "Chapter 1: Foundations - Sounds & Basics",
+      description: "Master the sounds of German and learn the absolute basics: pronouns, genders, and essential grammar rules.",
       lessons: [
         {
           id: "l1",
@@ -74,6 +74,185 @@ export const curriculum = {
           }
         },
         {
+          id: "l1_2",
+          title: "Personal Pronouns & Basic Grammar",
+          type: "lesson",
+          xp: 30,
+          content: [
+            {
+              type: "text",
+              title: "The Most Important Words",
+              value: "To speak any language, you need to refer to people: 'I', 'you', 'he', 'she'. In German, we also have different words for 'me', 'him', and 'her' depending on whether they are doing the action or receiving it. This lesson covers these absolute essentials."
+            },
+            {
+              type: "table",
+              title: "1. Subject Pronouns (The 'Doers')",
+              headers: ["German", "Pronunciation", "English", "Example"],
+              rows: [
+                ["ich", "ikh", "I", "**Ich** bin hier. (I am here)"],
+                ["du", "doo", "you (informal)", "**Du** bist nett. (You are nice)"],
+                ["er", "air", "he", "**Er** ist groß. (He is tall)"],
+                ["sie", "zee", "she", "**Sie** ist klug. (She is smart)"],
+                ["es", "es", "it", "**Es** ist gut. (It is good)"],
+                ["wir", "veer", "we", "**Wir** gehen. (We go)"],
+                ["ihr", "eer", "you all (informal)", "**Ihr** spielt. (You all play)"],
+                ["sie", "zee", "they", "**Sie** kommen. (They come)"],
+                ["Sie", "zee", "You (Formal)", "**Sie** sind hier. (You are here)"]
+              ]
+            },
+            {
+              type: "info",
+              title: "Grammar Rule: Capitalization",
+              value: "In German, **ALL Nouns** are capitalized, not just names! \n\nCorrect: Das **H**aus ist groß. (The house is big)\nIncorrect: Das haus ist groß."
+            },
+            {
+              type: "table",
+              title: "2. Object Pronouns (The 'Receivers')",
+              headers: ["German", "Pronunciation", "English", "Example"],
+              rows: [
+                ["mich", "mikh", "me", "Er liebt **mich**. (He loves me)"],
+                ["dich", "dikh", "you", "Ich sehe **dich**. (I see you)"],
+                ["ihn", "een", "him", "Ich kenne **ihn**. (I know him)"],
+                ["sie", "zee", "her", "Ich sehe **sie**. (I see her)"],
+                ["es", "es", "it", "Ich habe **es**. (I have it)"],
+                ["uns", "oons", "us", "Er hilft **uns**. (He helps us)"],
+                ["euch", "oykh", "you all", "Ich höre **euch**. (I hear you all)"],
+                ["sie", "zee", "them", "Ich mag **sie**. (I like them)"],
+                ["Sie", "zee", "You (Formal)", "Ich verstehe **Sie**. (I understand you)"]
+              ]
+            },
+            {
+              type: "info",
+              title: "When to use what?",
+              value: "**Subject (Nominative)**: Use 'ich, er, sie' when the person is DOING the action.\n**Object (Accusative)**: Use 'mich, ihn, sie' when the action is happening TO the person.\n\nExample: **Er** (Subject) sieht **mich** (Object). -> He sees me."
+            },
+            {
+              type: "info",
+              title: "Grammar Rule: The Three Genders",
+              value: "German nouns have three genders:\n1. **Der** (Masculine) - e.g., Der Mann (the man)\n2. **Die** (Feminine) - e.g., Die Frau (the woman)\n3. **Das** (Neutral) - e.g., Das Kind (the child)\n\nYou must learn the gender with every new noun!"
+            }
+          ],
+          recap: {
+            vocabulary: [
+              { de: "ich", pronunciation: "ikh", en: "I" },
+              { de: "du", pronunciation: "doo", en: "you (informal)" },
+              { de: "er", pronunciation: "air", en: "he" },
+              { de: "sie", pronunciation: "zee", en: "she/they" },
+              { de: "mich", pronunciation: "mikh", en: "me" },
+              { de: "ihn", pronunciation: "een", en: "him" }
+            ],
+            sentences: [
+              { de: "Ich liebe dich.", pronunciation: "ikh lee-beh dikh", en: "I love you." },
+              { de: "Er sieht uns.", pronunciation: "air zeet oons", en: "He sees us." }
+            ]
+          }
+        },
+        {
+          id: "l1_3",
+          title: "Basic Verb Conjugation",
+          type: "lesson",
+          xp: 35,
+          content: [
+            {
+              type: "text",
+              title: "Verbs: The Engine of the Sentence",
+              value: "In German, verbs change their ending depending on WHO is doing the action. This is called 'conjugation'. Most verbs follow a simple pattern."
+            },
+            {
+              type: "info",
+              title: "The Golden Rule: -en",
+              value: "The dictionary form of almost all German verbs ends in **-en** (e.g., *komm**en***, *geh**en***, *mach**en***). To use them, you remove the -en and add the correct ending."
+            },
+            {
+              type: "table",
+              title: "Regular Verb Pattern (e.g., kommen - to come)",
+              headers: ["Pronoun", "Ending", "Example", "Meaning"],
+              rows: [
+                ["ich", "-e", "ich komm**e**", "I come"],
+                ["du", "-st", "du komm**st**", "you come"],
+                ["er/sie/es", "-t", "er komm**t**", "he comes"],
+                ["wir", "-en", "wir komm**en**", "we come"],
+                ["ihr", "-t", "ihr komm**t**", "you all come"],
+                ["sie/Sie", "-en", "sie komm**en**", "they/You come"]
+              ]
+            },
+            {
+              type: "table",
+              title: "The 'Big Two' Irregular Verbs",
+              headers: ["Pronoun", "Sein (to be)", "Haben (to have)"],
+              rows: [
+                ["ich", "bin", "habe"],
+                ["du", "bist", "hast"],
+                ["er/sie/es", "ist", "hat"],
+                ["wir", "sind", "haben"],
+                ["ihr", "seid", "habt"],
+                ["sie/Sie", "sind", "haben"]
+              ]
+            },
+            {
+              type: "info",
+              title: "Tip",
+              value: "Memorize 'sein' and 'haben' immediately! You will use them in almost every conversation."
+            }
+          ],
+          recap: {
+            vocabulary: [
+              { de: "sein", pronunciation: "zine", en: "to be" },
+              { de: "haben", pronunciation: "hah-ben", en: "to have" },
+              { de: "kommen", pronunciation: "kom-men", en: "to come" },
+              { de: "wohnen", pronunciation: "voh-nen", en: "to live" }
+            ],
+            sentences: [
+              { de: "Ich bin müde.", pronunciation: "ikh bin mue-deh", en: "I am tired." },
+              { de: "Du hast Zeit.", pronunciation: "doo hast tsite", en: "You have time." }
+            ]
+          }
+        },
+        {
+          id: "l1_4",
+          title: "Simple Sentence Structure",
+          type: "lesson",
+          xp: 35,
+          content: [
+            {
+              type: "text",
+              title: "The Blueprint of a German Sentence",
+              value: "German sentence structure is strict but logical. For simple statements, we use the S-V-O order: Subject - Verb - Object."
+            },
+            {
+              type: "info",
+              title: "Rule #1: Verb in Position 2",
+              value: "In a normal statement, the **conjugated verb** must always be the **second idea** in the sentence. This is the most important rule in German grammar!"
+            },
+            {
+              type: "table",
+              title: "Sentence Construction",
+              headers: ["Position 1 (Subject)", "Position 2 (Verb)", "Position 3 (Rest)"],
+              rows: [
+                ["Ich", "komme", "aus Deutschland."],
+                ["Er", "wohnt", "in Berlin."],
+                ["Wir", "lernen", "Deutsch."],
+                ["Das Kind", "spielt", "Fußball."]
+              ]
+            },
+            {
+              type: "info",
+              title: "Questions",
+              value: "To ask a Yes/No question, simply swap the Subject and Verb.\n\nStatement: **Du kommst** aus Berlin.\nQuestion: **Kommst du** aus Berlin?"
+            }
+          ],
+          recap: {
+            vocabulary: [
+              { de: "und", pronunciation: "oont", en: "and" },
+              { de: "aber", pronunciation: "ah-ber", en: "but" },
+              { de: "oder", pronunciation: "oh-der", en: "or" }
+            ],
+            sentences: [
+              { de: "Ich heiße Max und ich komme aus Wien.", pronunciation: "...", en: "My name is Max and I come from Vienna." }
+            ]
+          }
+        },
+        {
           id: "q1",
           title: "Chapter 1 Quiz",
           type: "quiz",
@@ -96,6 +275,60 @@ export const curriculum = {
               text: "What is the 'ß' character?",
               options: ["A form of B", "A sharp S sound", "A silent letter", "A vowel"],
               correct: 1
+            },
+            {
+              id: 4,
+              text: "Which word means 'me' in 'He sees me'?",
+              options: ["ich", "mich", "mir", "mein"],
+              correct: 1
+            },
+            {
+              id: 5,
+              text: "Translate: 'He is here.'",
+              options: ["Er ist hier.", "Ihn ist hier.", "Es ist hier.", "Sie ist hier."],
+              correct: 0
+            },
+            {
+              id: 6,
+              text: "What is the rule for German nouns?",
+              options: ["Always lowercase", "Always capitalized", "Capitalized only at start of sentence", "No rule"],
+              correct: 1
+            },
+            {
+              id: 7,
+              text: "Which word means 'him'?",
+              options: ["er", "ihn", "ihm", "sein"],
+              correct: 1
+            },
+            {
+              id: 8,
+              text: "What are the three genders in German?",
+              options: ["He, She, It", "Der, Die, Das", "El, La, Lo", "Un, Une, Des"],
+              correct: 1
+            },
+            {
+              id: 9,
+              text: "Conjugate 'kommen' for 'du' (you):",
+              options: ["du komme", "du kommt", "du kommst", "du kommen"],
+              correct: 2
+            },
+            {
+              id: 10,
+              text: "Where does the verb go in a normal sentence?",
+              options: ["Position 1", "Position 2", "At the end", "Anywhere"],
+              correct: 1
+            },
+            {
+              id: 11,
+              text: "Translate: 'We have time.'",
+              options: ["Wir haben Zeit.", "Wir sind Zeit.", "Wir hat Zeit.", "Wir habe Zeit."],
+              correct: 0
+            },
+            {
+              id: 12,
+              text: "Which is the correct verb form for 'er' (he)?",
+              options: ["-e", "-st", "-t", "-en"],
+              correct: 2
             }
           ]
         }
