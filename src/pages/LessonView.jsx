@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { curriculum } from '../data/curriculum';
 import { useProgress } from '../context/ProgressContext';
 import Quiz from '../components/Quiz';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
@@ -10,21 +9,70 @@ export default function LessonView() {
   const navigate = useNavigate();
   const { completeLesson, isLessonCompleted } = useProgress();
   const [lesson, setLesson] = useState(null);
+  const [curriculumData, setCurriculumData] = useState(null);
+  const [error, setError] = useState(null);
+  const [showCompletion, setShowCompletion] = useState(false);
+
+  // Dynamic import for curriculum to prevent main thread blocking/crashing
+  useEffect(() => {
+    import('../data/curriculum')
+      .then(module => {
+        setCurriculumData(module.curriculum);
+      })
+      .catch(err => {
+        console.error("Failed to load curriculum:", err);
+        setError("Failed to load lesson data. Please try again.");
+      });
+  }, []);
 
   useEffect(() => {
-    const unit = curriculum.units.find(u => u.id === unitId);
+    if (!curriculumData) return;
+
+    console.log("LessonView params:", { unitId, lessonId });
+    const unit = curriculumData.units.find(u => u.id === unitId);
     if (unit) {
       const foundLesson = unit.lessons.find(l => l.id === lessonId);
+      console.log("Found lesson:", foundLesson);
       setLesson(foundLesson);
+    } else {
+      console.error("Unit not found:", unitId);
     }
-  }, [unitId, lessonId]);
-
-  if (!lesson) return <div className="p-8 text-center">Loading...</div>;
+  }, [unitId, lessonId, curriculumData]);
 
   const handleComplete = () => {
+    setShowCompletion(true);
     completeLesson(lesson.id, lesson.xp);
-    navigate('/');
+    // Delay navigation to show animation
+    setTimeout(() => {
+      navigate('/');
+    }, 2000);
   };
+
+  if (error) {
+    return (
+      <div className="p-12 text-center text-red-500">
+        <div className="text-xl font-bold mb-2">Error</div>
+        <p>{error}</p>
+        <button onClick={() => navigate('/')} className="mt-4 btn btn-secondary">
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  if (!lesson) {
+    return (
+      <div className="p-12 text-center">
+        <div className="text-xl text-muted mb-4">Loading lesson...</div>
+        <div className="text-sm text-muted opacity-75 mb-4">
+          Looking for: {unitId} / {lessonId}
+        </div>
+        <button onClick={() => navigate('/')} className="mt-4 btn btn-secondary">
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
 
   if (lesson.type === 'quiz') {
     return (
@@ -60,53 +108,53 @@ export default function LessonView() {
             )}
 
             {block.type === 'vocabulary' && (
-      <div className="vocab-list">
-        {block.items.map((item, i) => (
-          <div key={i} className="vocab-item">
-            <div className="vocab-main">
-              <div className="vocab-de">{item.de}</div>
-              {item.pronunciation && (
-                <div className="vocab-pronunciation">/{item.pronunciation}/</div>
-              )}
-            </div>
-            <div className="vocab-en">{item.en}</div>
-            {item.context && <div className="vocab-ctx">{item.context}</div>}
-          </div>
-        ))}
-      </div>
-    )}
-
-    {block.type === 'sentences' && (
-      <div className="sentence-list">
-        <h4 className="font-bold mb-4 text-lg">Practice Sentences</h4>
-        {block.items.map((item, i) => (
-          <div key={i} className="sentence-item mb-4 p-3 bg-surface rounded-lg border border-border">
-            <div className="text-lg font-medium text-primary mb-1">{item.de}</div>
-            {item.pronunciation && (
-              <div className="text-sm text-accent mb-1 font-mono">/{item.pronunciation}/</div>
+              <div className="vocab-list">
+                {block.items.map((item, i) => (
+                  <div key={i} className="vocab-item">
+                    <div className="vocab-main">
+                      <div className="vocab-de">{item.de}</div>
+                      {item.pronunciation && (
+                        <div className="vocab-pronunciation">/{item.pronunciation}/</div>
+                      )}
+                    </div>
+                    <div className="vocab-en">{item.en}</div>
+                    {item.context && <div className="vocab-ctx">{item.context}</div>}
+                  </div>
+                ))}
+              </div>
             )}
-            <div className="text-muted italic">{item.en}</div>
-          </div>
-        ))}
-      </div>
-    )}
 
-    {block.type === 'dialogue' && (
-      <div className="dialogue-container">
-        {block.lines.map((line, i) => (
-          <div key={i} className={`dialogue-line ${line.speaker === 'You' ? 'dialogue-right' : 'dialogue-left'}`}>
-            <div className="dialogue-bubble">
-              <div className="dialogue-speaker">{line.speaker}</div>
-              <div className="dialogue-text-de">{line.de}</div>
-              {line.pronunciation && (
-                <div className="dialogue-pronunciation">/{line.pronunciation}/</div>
-              )}
-              <div className="dialogue-text-en">{line.en}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
+            {block.type === 'sentences' && (
+              <div className="sentence-list">
+                <h4 className="font-bold mb-4 text-lg">Practice Sentences</h4>
+                {block.items.map((item, i) => (
+                  <div key={i} className="sentence-item mb-4 p-3 bg-surface rounded-lg border border-border">
+                    <div className="text-lg font-medium text-primary mb-1">{item.de}</div>
+                    {item.pronunciation && (
+                      <div className="text-sm text-accent mb-1 font-mono">/{item.pronunciation}/</div>
+                    )}
+                    <div className="text-muted italic">{item.en}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {block.type === 'dialogue' && (
+              <div className="dialogue-container">
+                {block.lines.map((line, i) => (
+                  <div key={i} className={`dialogue-line ${line.speaker === 'You' ? 'dialogue-right' : 'dialogue-left'}`}>
+                    <div className="dialogue-bubble">
+                      <div className="dialogue-speaker">{line.speaker}</div>
+                      <div className="dialogue-text-de">{line.de}</div>
+                      {line.pronunciation && (
+                        <div className="dialogue-pronunciation">/{line.pronunciation}/</div>
+                      )}
+                      <div className="dialogue-text-en">{line.en}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {block.type === 'table' && (
               <div className="table-container">
@@ -178,6 +226,16 @@ export default function LessonView() {
         </button>
       </div>
 
+      {showCompletion && (
+        <div className="completion-overlay">
+          <div className="completion-content">
+            <span className="completion-icon">🎉</span>
+            <h2 className="text-3xl font-bold mb-2">Lesson Completed!</h2>
+            <p className="text-xl text-muted">+{lesson.xp} XP Earned</p>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .lesson-view {
           max-width: 800px;
@@ -235,148 +293,121 @@ export default function LessonView() {
 
         .dialogue-bubble {
           max-width: 80%;
-          padding: var(--spacing-md);
-          border-radius: var(--radius-lg);
-          background: var(--background);
-          border: 1px solid var(--border);
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          box-sizing: border-box;
+          padding: var(--spacing-lg);
+          border-radius: var(--radius-xl);
+          background: var(--bg-paper);
+          border: 2px solid var(--border-book);
+          position: relative;
+          box-shadow: var(--shadow-page);
         }
 
-        @media (max-width: 768px) {
-          .dialogue-bubble {
-            max-width: 92%;
-            padding: var(--spacing-sm);
-          }
+        /* Cloud/Speech Bubble Tail */
+        .dialogue-left .dialogue-bubble {
+          border-bottom-left-radius: 4px;
         }
 
-        .back-btn {
-          padding: var(--spacing-sm);
-          border-radius: 50%;
-          background: var(--surface);
-          border: 1px solid var(--border);
-          transition: all 0.2s;
+        .dialogue-right .dialogue-bubble {
+          border-bottom-right-radius: 4px;
+          background: var(--bg-secondary);
         }
 
-        .back-btn:hover {
-          background: var(--background);
-          transform: translateX(-2px);
+        .dialogue-left .dialogue-bubble::before {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: -10px;
+          width: 20px;
+          height: 20px;
+          background: var(--bg-paper);
+          border-bottom: 2px solid var(--border-book);
+          border-left: 2px solid var(--border-book);
+          border-radius: 0 0 0 100%;
+          z-index: 1;
         }
 
-        .xp-pill {
-          margin-left: auto;
-          background: var(--accent);
-          color: white;
-          padding: 4px 12px;
-          border-radius: var(--radius-full);
-          font-weight: bold;
+        .dialogue-right .dialogue-bubble::before {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          right: -10px;
+          width: 20px;
+          height: 20px;
+          background: var(--bg-secondary);
+          border-bottom: 2px solid var(--border-book);
+          border-right: 2px solid var(--border-book);
+          border-radius: 0 0 100% 0;
+          z-index: 1;
         }
 
-        .content-stack {
+        /* Completion Animation Overlay */
+        .completion-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.9);
           display: flex;
           flex-direction: column;
-          gap: var(--spacing-lg);
-        }
-
-        .content-block {
-          padding: var(--spacing-xl);
-          max-width: 100%;
-          box-sizing: border-box;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-        }
-
-        @media (max-width: 768px) {
-          .content-block {
-            padding: var(--spacing-md);
-          }
-        }
-
-        .vocab-list {
-          display: grid;
-          gap: var(--spacing-md);
-        }
-
-        @media (max-width: 640px) {
-          .vocab-list {
-            grid-template-columns: 1fr;
-          }
-          
-          .vocab-item {
-            grid-template-columns: 1fr;
-            gap: var(--spacing-sm);
-          }
-          
-          .vocab-main {
-            margin-bottom: var(--spacing-xs);
-          }
-        }
-
-        .vocab-item {
-          display: grid;
-          grid-template-columns: 1fr 1fr auto;
           align-items: center;
-          padding: var(--spacing-md);
-          background: var(--background);
-          border-radius: var(--radius-md);
+          justify-content: center;
+          z-index: 1000;
+          animation: fadeIn 0.3s ease-out;
         }
 
-        /* ... (existing styles) ... */
+        .completion-content {
+          text-align: center;
+          animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-        .table-container {
-          max-width: 100%;
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
+        .completion-icon {
+          font-size: 5rem;
+          color: var(--accent-sage);
           margin-bottom: var(--spacing-md);
+          display: block;
+        }
+
+        @keyframes scaleUp {
+          from { transform: scale(0.5); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Table Styles */
+        .table-container {
+          overflow-x: auto;
+          margin-bottom: var(--spacing-lg);
           border-radius: var(--radius-md);
-          border: 1px solid var(--border);
-          box-sizing: border-box;
+          border: 1px solid var(--border-book);
+          background: var(--bg-paper);
         }
 
         .lesson-table {
           width: 100%;
           border-collapse: collapse;
-          /* Removed min-width: 500px that was causing overflow */
+          min-width: 500px; /* Ensure it doesn't squish too much */
         }
 
-        .lesson-table th, .lesson-table td {
-          padding: var(--spacing-md);
+        .lesson-table th,
+        .lesson-table td {
+          padding: 12px 16px;
           text-align: left;
-          border-bottom: 1px solid var(--border);
+          border-bottom: 1px solid var(--border-book);
+          vertical-align: top;
         }
 
         .lesson-table th {
-          font-weight: bold;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          font-size: 0.875rem;
-          background-color: var(--background);
+          background: var(--bg-secondary);
+          font-weight: 700;
+          color: var(--text-primary);
+          white-space: nowrap;
         }
 
-        @media (max-width: 768px) {
-          .lesson-table th, .lesson-table td {
-            padding: 0.5rem; /* Reduced padding for mobile */
-            font-size: 0.875rem; /* Smaller font for mobile */
-            word-break: break-word; /* Force wrapping */
-            hyphens: auto;
-          }
-          
-          .lesson-table th {
-            font-size: 0.75rem;
-          }
+        .lesson-table tr:last-child td {
+          border-bottom: none;
         }
 
-        .info-box {
-          background: rgba(245, 158, 11, 0.1);
-          border-left: 4px solid var(--accent);
-          padding: var(--spacing-md);
-          border-radius: 0 var(--radius-md) var(--radius-md) 0;
-        }
-
-        .btn-lg {
-          padding: 1rem 2.5rem;
-          font-size: 1.1rem;
+        .lesson-table tr:hover td {
+          background: rgba(0, 0, 0, 0.02);
         }
       `}</style>
     </div>
