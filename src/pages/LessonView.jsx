@@ -40,12 +40,17 @@ export default function LessonView() {
   }, [unitId, lessonId, curriculumData]);
 
   const handleComplete = () => {
-    setShowCompletion(true);
     completeLesson(lesson.id, lesson.xp);
-    // Delay navigation to show animation
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
+    
+    // For quizzes, the Quiz component handles the result view and navigation.
+    // We only want to show the overlay and auto-navigate for regular text lessons.
+    if (lesson.type !== 'quiz') {
+      setShowCompletion(true);
+      // Delay navigation to show animation
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    }
   };
 
   if (error) {
@@ -289,6 +294,26 @@ export default function LessonView() {
           display: flex;
           align-items: center;
           gap: var(--spacing-lg);
+        }
+
+        .back-btn {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--bg-paper);
+          border: 1px solid var(--border-book);
+          color: var(--text-secondary);
+          transition: all 0.2s;
+          box-shadow: var(--shadow-page);
+        }
+
+        .back-btn:hover {
+          transform: translateX(-2px);
+          color: var(--text-primary);
+          border-color: var(--accent-gold);
         }
 
         .dialogue-bubble {

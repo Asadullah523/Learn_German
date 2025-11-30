@@ -1,12 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useProgress } from '../context/ProgressContext';
 import { curriculum } from '../data/curriculum';
 import DailyProgress from '../components/DailyProgress';
 import MotivationalQuote from '../components/MotivationalQuote';
-import ChapterCard from '../components/ChapterCard';
+import UnitCard from '../components/UnitCard';
+import LessonCard from '../components/LessonCard';
+import { X } from 'lucide-react';
 
 export default function Dashboard() {
   const { progress, isLessonCompleted } = useProgress();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedUnit, setSelectedUnit] = useState(null);
+
+  // Sync state with URL params
+  useEffect(() => {
+    const unitId = searchParams.get('unit');
+    if (unitId) {
+      const unit = curriculum.units.find(u => u.id === unitId);
+      if (unit) setSelectedUnit(unit);
+    } else {
+      setSelectedUnit(null);
+    }
+  }, [searchParams]);
+
+  const handleUnitClick = (unit) => {
+    setSearchParams({ unit: unit.id });
+  };
+
+  const closeUnitModal = () => {
+    setSearchParams({});
+  };
 
   // Calculate overall progress
   const totalLessons = curriculum.units.reduce((acc, unit) => acc + unit.lessons.length, 0);
@@ -21,74 +45,53 @@ export default function Dashboard() {
   else if (hour < 18) greeting = 'Good Afternoon';
   else greeting = 'Good Evening';
 
+  const getUnitProgress = (unit) => {
+    const unitLessons = unit.lessons;
+    const completedUnitLessons = unitLessons.filter(l => isLessonCompleted(l.id)).length;
+    return {
+      totalLessons: unitLessons.length,
+      completedLessons: completedUnitLessons
+    };
+  };
+
+  const isUnitLocked = (index) => {
+    if (index === 0) return false;
+    const prevUnit = curriculum.units[index - 1];
+    const prevUnitProgress = getUnitProgress(prevUnit);
+    return prevUnitProgress.completedLessons < prevUnitProgress.totalLessons;
+  };
+
   return (
     <div className="dashboard-container animate-fade-in">
-      {/* Hero Section with Greeting */}
+      {/* Hero Section */}
       <section className="hero-section">
         <div className="greeting-box">
-          <h1 className="greeting">{greeting}</h1>
+          <h1 className="greeting">
+            <span className="greeting-text">{greeting}</span>
+            <span className="greeting-wave">👋</span>
+          </h1>
           <p className="hero-subtitle">Ready to continue your German journey?</p>
         </div>
         
-        <div className="overall-progress-card">
-          <div className="progress-content-wrapper">
-            <div className="progress-circle-section">
-              <div className="progress-circle">
-                <svg viewBox="0 0 100 100" className="progress-ring">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    fill="none"
-                    stroke="rgba(139, 115, 85, 0.1)"
-                    strokeWidth="8"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    fill="none"
-                    stroke="url(#goldGradient)"
-                    strokeWidth="8"
-                    strokeDasharray={`${progressPercentage * 2.64} 264`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 50 50)"
-                    className="progress-ring-fill"
-                  />
-                  <defs>
-                    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#D4A574" />
-                      <stop offset="100%" stopColor="#B8936A" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="progress-percentage">{progressPercentage}%</div>
-              </div>
-              <div className="course-info">
-                <h2 className="course-title">German A1</h2>
-                <p className="author-credit">From Zero to Hero</p>
-              </div>
-            </div>
-            
-            <div className="stats-pills">
-              <div className="stat-pill">
-                <span className="stat-pill-value">{completedCount}</span>
-                <span className="stat-pill-label">Done</span>
-              </div>
-              <div className="stat-pill">
-                <span className="stat-pill-value">{totalLessons - completedCount}</span>
-                <span className="stat-pill-label">Left</span>
-              </div>
-              <div className="stat-pill">
-                <span className="stat-pill-value">{progress.xp}</span>
-                <span className="stat-pill-label">XP</span>
-              </div>
-            </div>
+        <div className="overall-stats-bar glass-card">
+          <div className="stat-item">
+            <span className="stat-value text-gradient">{progressPercentage}%</span>
+            <span className="stat-label">Total Progress</span>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-item">
+            <span className="stat-value">{completedCount}</span>
+            <span className="stat-label">Lessons Done</span>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-item">
+            <span className="stat-value">{progress.xp}</span>
+            <span className="stat-label">Total XP</span>
           </div>
         </div>
       </section>
 
-      {/* Motivation & Progress Grid */}
+      {/* Motivation Grid */}
       <section className="motivation-section">
         <div className="motivation-grid">
           <DailyProgress />
@@ -96,173 +99,163 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Learning Path */}
-      <section className="learning-path">
-        {curriculum.units.map((unit, unitIndex) => (
-          <div key={unit.id} className="unit-chapter animate-slide-up" style={{ animationDelay: `${unitIndex * 0.1}s` }}>
-            <div className="unit-header-section">
-              <div className="unit-number">Unit {unitIndex + 1}</div>
-              <div className="unit-info">
-                <h2 className="unit-title">{unit.title}</h2>
-                <p className="unit-description">{unit.description}</p>
-              </div>
-            </div>
+      {/* Units Grid */}
+      <section className="units-section">
+        <h2 className="section-title">Your Learning Path</h2>
+        <div className="units-grid">
+          {curriculum.units.map((unit, index) => (
+            <UnitCard
+              key={unit.id}
+              unit={unit}
+              progress={getUnitProgress(unit)}
+              isLocked={isUnitLocked(index)}
+              onClick={() => handleUnitClick(unit)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Expanded Unit View (Modal/Overlay) */}
+      {selectedUnit && (
+        <div className="unit-modal-overlay" onClick={closeUnitModal}>
+          <div className="unit-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-modal-btn" onClick={closeUnitModal}>
+              <X size={24} />
+            </button>
             
-            <div className="chapters-grid">
-              {unit.lessons.map((lesson, lessonIndex) => (
-                <ChapterCard
-                  key={lesson.id}
-                  lesson={lesson}
-                  unitId={unit.id}
-                  isCompleted={isLessonCompleted(lesson.id)}
-                  chapterIndex={lessonIndex}
-                />
-              ))}
+            <div className="modal-header">
+              <span className="modal-subtitle">Unit {selectedUnit.id.replace('ch', '')}</span>
+              <h2 className="modal-title">{selectedUnit.title.split(':')[1] || selectedUnit.title}</h2>
+              <p className="modal-description">{selectedUnit.description}</p>
+            </div>
+
+            <div className="lessons-list">
+              {selectedUnit.lessons.map((lesson, index) => {
+                const isLocked = index > 0 && !isLessonCompleted(selectedUnit.lessons[index - 1].id);
+                
+                return (
+                  <LessonCard
+                    key={lesson.id}
+                    lesson={lesson}
+                    unitId={selectedUnit.id}
+                    isCompleted={isLessonCompleted(lesson.id)}
+                    isLocked={isLocked}
+                  />
+                );
+              })}
             </div>
           </div>
-        ))}
-      </section>
+        </div>
+      )}
 
       <style>{`
         .dashboard-container {
           padding: var(--spacing-xl) var(--spacing-md);
-          max-width: 1400px;
+          max-width: 1200px;
           margin: 0 auto;
+          padding-bottom: 100px;
         }
 
         /* Hero Section */
         .hero-section {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-lg);
-          margin-bottom: var(--spacing-2xl);
-        }
-
-        .greeting-box {
           text-align: center;
-          padding: var(--spacing-lg);
+          margin-bottom: var(--spacing-2xl);
+          position: relative;
         }
 
         .greeting {
-          font-size: 2.5rem;
-          font-weight: 700;
+          font-family: 'Outfit', sans-serif;
+          font-size: 3.5rem;
+          font-weight: 800;
           color: var(--text-primary);
-          margin-bottom: var(--spacing-xs);
-          font-family: 'Crimson Text', serif;
-          letter-spacing: -0.02em;
+          margin-bottom: var(--spacing-sm);
+          letter-spacing: -0.03em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+        }
+
+        .greeting-text {
+          background: var(--gradient-dark);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        [data-theme="dark"] .greeting-text {
+          background: linear-gradient(to right, #fff, #ccc);
+          -webkit-background-clip: text;
+        }
+
+        .greeting-wave {
+          display: inline-block;
+          animation: wave 2s infinite;
+          transform-origin: 70% 70%;
+        }
+
+        @keyframes wave {
+          0% { transform: rotate(0deg); }
+          10% { transform: rotate(14deg); }
+          20% { transform: rotate(-8deg); }
+          30% { transform: rotate(14deg); }
+          40% { transform: rotate(-4deg); }
+          50% { transform: rotate(10deg); }
+          60% { transform: rotate(0deg); }
+          100% { transform: rotate(0deg); }
         }
 
         .hero-subtitle {
-          font-size: 1.1rem;
-          color: var(--text-muted);
-          font-style: italic;
-        }
-
-        .overall-progress-card {
-          background: var(--bg-paper);
-          border-radius: var(--radius-xl);
-          padding: var(--spacing-lg);
-          box-shadow: var(--shadow-book);
-          border: var(--border-book);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .overall-progress-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 4px;
-          background: var(--gradient-gold);
-        }
-
-        .progress-content-wrapper {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: var(--spacing-xl);
-        }
-
-        .progress-circle-section {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-lg);
-        }
-
-        .progress-circle {
-          position: relative;
-          width: 80px;
-          height: 80px;
-          flex-shrink: 0;
-        }
-
-        .progress-ring {
-          width: 100%;
-          height: 100%;
-          transform: rotate(0deg);
-        }
-
-        .progress-ring-fill {
-          transition: stroke-dasharray 1s ease-out;
-        }
-
-        .progress-percentage {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
           font-size: 1.25rem;
-          font-weight: 800;
-          color: var(--accent-gold);
-          font-family: 'Crimson Text', serif;
+          color: var(--text-secondary);
+          margin-bottom: var(--spacing-xl);
+          font-weight: 500;
         }
 
-        .course-title {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--text-primary);
-          margin-bottom: 2px;
-          font-family: 'Crimson Text', serif;
+        .overall-stats-bar {
+          display: inline-flex;
+          align-items: center;
+          padding: var(--spacing-lg) var(--spacing-2xl);
+          gap: var(--spacing-2xl);
+          background: white; /* Solid white */
+          border: 1px solid rgba(0,0,0,0.1);
+          box-shadow: var(--shadow-lg);
+          border-radius: var(--radius-xl);
         }
 
-        .author-credit {
-          color: var(--text-muted);
-          font-size: 0.9rem;
-          font-style: italic;
-        }
-
-        .stats-pills {
-          display: flex;
-          gap: var(--spacing-md);
-        }
-
-        .stat-pill {
+        .stat-item {
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: var(--spacing-sm) var(--spacing-lg);
-          background: rgba(212, 165, 116, 0.08);
-          border-radius: var(--radius-full);
-          border: 1px solid rgba(212, 165, 116, 0.15);
-          min-width: 80px;
         }
 
-        .stat-pill-value {
-          font-size: 1.25rem;
+        .stat-value {
+          font-size: 2rem;
           font-weight: 800;
-          color: var(--accent-gold);
-          font-family: 'Crimson Text', serif;
+          color: var(--text-primary);
           line-height: 1;
+          font-family: 'Outfit', sans-serif;
         }
 
-        .stat-pill-label {
-          font-size: 0.7rem;
-          color: var(--text-muted);
-          font-weight: 600;
+        .text-gradient {
+          background: var(--gradient-primary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+          font-size: 0.75rem;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.1em;
+          color: var(--text-muted);
+          font-weight: 700;
+          margin-top: 8px;
+        }
+
+        .stat-divider {
+          width: 1px;
+          height: 40px;
+          background: var(--text-muted);
+          opacity: 0.2;
         }
 
         /* Motivation Section */
@@ -276,119 +269,147 @@ export default function Dashboard() {
           gap: var(--spacing-lg);
         }
 
-        /* Learning Path */
-        .learning-path {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-2xl);
-        }
-
-        .unit-chapter {
-          background: var(--bg-paper);
-          border-radius: var(--radius-xl);
-          padding: var(--spacing-xl);
-          box-shadow: var(--shadow-page);
-          border: var(--border-book);
-          position: relative;
-        }
-
-        .unit-chapter::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 4px;
-          height: 100%;
-          background: var(--gradient-sage);
-          border-radius: var(--radius-xl) 0 0 var(--radius-xl);
-        }
-
-        .unit-header-section {
-          display: flex;
-          align-items: flex-start;
-          gap: var(--spacing-md);
-          margin-bottom: var(--spacing-xl);
-          padding-bottom: var(--spacing-lg);
-          border-bottom: 2px solid rgba(139, 115, 85, 0.1);
-        }
-
-        .unit-number {
-          font-size: 0.9rem;
-          font-weight: 800;
-          color: white;
-          background: var(--gradient-sage);
-          padding: 8px 16px;
-          border-radius: var(--radius-md);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          box-shadow: var(--shadow-page);
-        }
-
-        .unit-info {
-          flex: 1;
-        }
-
-        .unit-title {
-          font-size: 1.5rem;
-          font-weight: 700;
+        /* Units Section */
+        .section-title {
+          font-family: 'Outfit', sans-serif;
+          font-size: 2rem;
           color: var(--text-primary);
-          margin-bottom: var(--spacing-xs);
-          font-family: 'Crimson Text', serif;
+          margin-bottom: var(--spacing-lg);
+          font-weight: 700;
         }
 
-        .unit-description {
-          color: var(--text-muted);
-          font-size: 0.95rem;
-          line-height: 1.5;
-        }
-
-        .chapters-grid {
+        .units-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
           gap: var(--spacing-lg);
         }
 
-        /* Responsive Design */
-        @media (max-width: 900px) {
-          .progress-content-wrapper {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--spacing-lg);
-          }
-          
-          .stats-pills {
-            width: 100%;
-            justify-content: space-between;
-          }
-          
-          .stat-pill {
-            flex: 1;
-          }
+        /* Modal / Expanded View */
+        .unit-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 255, 255, 0.9); /* Light solid overlay */
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: var(--spacing-md);
+          animation: fadeIn 0.2s ease-out;
+        }
 
-          .motivation-grid {
-            grid-template-columns: 1fr;
-          }
+        .unit-modal {
+          background: var(--bg-card);
+          width: 100%;
+          max-width: 600px;
+          max-height: 85vh;
+          border-radius: var(--radius-xl);
+          box-shadow: var(--shadow-lg);
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          overflow: hidden;
+          border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .close-modal-btn {
+          position: absolute;
+          top: var(--spacing-md);
+          right: var(--spacing-md);
+          background: rgba(0,0,0,0.05);
+          border: none;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: var(--text-secondary);
+          transition: all 0.2s;
+          z-index: 10;
+        }
+
+        .close-modal-btn:hover {
+          background: rgba(0,0,0,0.1);
+          color: var(--text-primary);
+          transform: rotate(90deg);
+        }
+
+        .modal-header {
+          padding: var(--spacing-xl);
+          background: var(--bg-primary);
+          border-bottom: 1px solid rgba(0,0,0,0.1);
+          flex-shrink: 0;
+        }
+
+        .modal-subtitle {
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--text-muted);
+          font-weight: 800;
+          display: block;
+          margin-bottom: var(--spacing-xs);
+        }
+
+        .modal-title {
+          font-family: 'Outfit', sans-serif;
+          font-size: 2rem;
+          font-weight: 800;
+          color: var(--text-primary);
+          margin-bottom: var(--spacing-sm);
+          line-height: 1.1;
+          padding-right: var(--spacing-xl);
+        }
+
+        .modal-description {
+          color: var(--text-secondary);
+          line-height: 1.6;
+          font-size: 1.05rem;
+        }
+
+        .lessons-list {
+          padding: var(--spacing-lg);
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-md);
+          background: var(--bg-secondary); /* Light grey background for contrast with white cards */
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from { transform: translateY(40px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
 
         @media (max-width: 768px) {
-          .dashboard-container {
-            padding: var(--spacing-md) var(--spacing-sm);
-          }
-
-          .greeting {
-            font-size: 1.85rem;
-          }
-
-          .chapters-grid {
+          .motivation-grid {
             grid-template-columns: 1fr;
           }
-
-          .unit-header-section {
-            flex-direction: column;
-          }
-
-          .unit-chapter {
+          
+          .overall-stats-bar {
+            width: 100%;
+            justify-content: space-between;
             padding: var(--spacing-lg);
+            gap: var(--spacing-sm);
+            flex-direction: row;
+          }
+          
+          .stat-label {
+            font-size: 0.65rem;
+          }
+          
+          .greeting {
+            font-size: 2.5rem;
           }
         }
       `}</style>
