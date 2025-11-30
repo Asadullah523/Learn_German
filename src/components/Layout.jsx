@@ -112,7 +112,9 @@ export default function Layout() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(45, 27, 11, 0.3);
+          background: rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
           z-index: 90;
           opacity: 0;
           pointer-events: none;
