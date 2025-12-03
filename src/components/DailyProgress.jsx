@@ -79,42 +79,87 @@ export default function DailyProgress() {
           display: flex;
           align-items: center;
           gap: var(--spacing-md);
-          padding: var(--spacing-md);
-          background: linear-gradient(135deg, rgba(212, 165, 116, 0.1), rgba(184, 147, 106, 0.05));
-          border-radius: var(--radius-full);
-          border: 1px solid rgba(212, 165, 116, 0.2);
+          padding: var(--spacing-lg);
+          background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 152, 0, 0.1));
+          border-radius: var(--radius-xl);
+          border: 2px solid rgba(255, 193, 7, 0.3);
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+        }
+
+        .streak-section::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            45deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 70%
+          );
+          animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+          0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+          100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
 
         .streak-icon {
-          font-size: 2rem;
+          font-size: 2.5rem;
           line-height: 1;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+          animation: pulse-fire 2s ease-in-out infinite;
+          position: relative;
+          z-index: 1;
+        }
+
+        @keyframes pulse-fire {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
         }
 
         .streak-info {
           display: flex;
           flex-direction: column;
           flex: 1;
+          position: relative;
+          z-index: 1;
         }
 
         .streak-number {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--accent-gold);
+          font-size: 2rem;
+          font-weight: 900;
+          background: linear-gradient(135deg, #FFC107, #FF9800);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           line-height: 1;
           font-family: 'Crimson Text', serif;
+          text-shadow: 0 2px 10px rgba(255, 193, 7, 0.3);
         }
 
         .streak-label {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          font-weight: 600;
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: 4px;
         }
 
         .streak-message {
-          font-size: 0.75rem;
-          color: var(--accent-burgundy);
-          font-weight: 600;
+          font-size: 0.85rem;
+          background: linear-gradient(135deg, #D32F2F, #C62828);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-weight: 700;
           font-style: italic;
+          position: relative;
+          z-index: 1;
         }
 
         .today-progress {

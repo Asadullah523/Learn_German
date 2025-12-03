@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProgress } from '../context/ProgressContext';
 import { RotateCcw, Moon, Sun, Trash2, AlertTriangle } from 'lucide-react';
 
@@ -8,6 +8,7 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
+  const confirmResetRef = useRef(null);
 
   const toggleDarkMode = () => {
     const newMode = !darkMode;
@@ -24,9 +25,21 @@ export default function Settings() {
   };
 
   // Apply dark mode on mount
-  React.useEffect(() => {
+  useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
+
+  // Auto-scroll to warning when it appears
+  useEffect(() => {
+    if (showConfirmReset && confirmResetRef.current) {
+      setTimeout(() => {
+        confirmResetRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 100);
+    }
+  }, [showConfirmReset]);
 
   return (
     <div className="settings-page animate-fade-in">
@@ -102,7 +115,7 @@ export default function Settings() {
             <span>Reset All Progress</span>
           </button>
         ) : (
-          <div className="confirm-reset">
+          <div className="confirm-reset" ref={confirmResetRef}>
             <div className="warning-box">
               <AlertTriangle size={24} />
               <div>
@@ -312,33 +325,45 @@ export default function Settings() {
           display: flex;
           flex-direction: column;
           gap: var(--spacing-lg);
+          min-height: 220px; /* Ensure enough space for both warning and buttons */
         }
 
         .warning-box {
           display: flex;
           gap: var(--spacing-md);
-          padding: var(--spacing-lg);
-          background: rgba(245, 158, 11, 0.1);
-          border: 2px solid rgba(245, 158, 11, 0.3);
-          border-radius: var(--radius-md);
+          padding: var(--spacing-xl);
+          background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08));
+          border: 2px solid rgba(245, 158, 11, 0.4);
+          border-radius: var(--radius-lg);
           color: #92400E;
+          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .warning-box svg {
+          flex-shrink: 0;
+          color: #F59E0B;
+          margin-top: 2px;
         }
 
         .warning-box h4 {
           font-weight: 700;
-          margin-bottom: var(--spacing-xs);
+          margin-bottom: var(--spacing-sm);
           color: #92400E;
+          font-size: 1.1rem;
         }
 
         .warning-box p {
-          font-size: 0.9rem;
-          line-height: 1.5;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: #78350F;
         }
 
         .confirm-actions {
           display: flex;
           gap: var(--spacing-md);
           justify-content: flex-end;
+          margin-top: auto; /* Push to bottom */
+          padding-top: var(--spacing-md);
         }
 
         .btn-secondary {
@@ -349,15 +374,22 @@ export default function Settings() {
           border-radius: var(--radius-md);
           font-weight: 600;
           transition: all var(--transition-base);
+          cursor: pointer;
+          position: relative;
+          z-index: 10;
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: flex !important;
         }
 
         .btn-secondary:hover {
           background: rgba(212, 165, 116, 0.1);
           border-color: var(--accent-gold);
+          transform: translateY(-2px);
         }
 
         .btn-danger {
-          display: flex;
+          display: flex !important;
           align-items: center;
           gap: var(--spacing-sm);
           padding: var(--spacing-sm) var(--spacing-lg);
@@ -367,12 +399,17 @@ export default function Settings() {
           border-radius: var(--radius-md);
           font-weight: 600;
           transition: all var(--transition-base);
+          cursor: pointer;
+          position: relative;
+          z-index: 10;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
 
         .btn-danger:hover {
           background: #6B3333;
           transform: translateY(-2px);
-          box-shadow: var(--shadow-page);
+          box-shadow: 0 6px 20px rgba(139, 69, 69, 0.4);
         }
 
         @media (max-width: 768px) {

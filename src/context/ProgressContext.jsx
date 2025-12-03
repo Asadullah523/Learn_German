@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const ProgressContext = createContext();
 
@@ -38,7 +38,8 @@ export const ProgressProvider = ({ children }) => {
       dailyXP: 0,
       weeklyActivity: [], // Last 7 days: [{date, xp, lessonsCompleted}]
       totalStudyTime: 0, // in minutes
-      startDate: new Date().toISOString()
+      startDate: new Date().toISOString(),
+      lastLesson: null // {unitId, lessonId}
     };
     
     if (saved) {
@@ -90,15 +91,15 @@ export const ProgressProvider = ({ children }) => {
     localStorage.setItem('germanAppProgress', JSON.stringify(progress));
   }, [progress]);
 
-  const addXp = (amount) => {
+  const addXp = useCallback((amount) => {
     setProgress(prev => ({
       ...prev,
       xp: prev.xp + amount,
       dailyXP: (prev.dailyXP || 0) + amount
     }));
-  };
+  }, []);
 
-  const completeLesson = (lessonId, xpReward) => {
+  const completeLesson = useCallback((lessonId, xpReward) => {
     if (!progress.completedLessons.includes(lessonId)) {
       const today = new Date().toISOString().split('T')[0];
       
@@ -133,11 +134,11 @@ export const ProgressProvider = ({ children }) => {
         };
       });
     }
-  };
+  }, [progress.completedLessons]);
 
-  const isLessonCompleted = (lessonId) => {
+  const isLessonCompleted = useCallback((lessonId) => {
     return progress.completedLessons.includes(lessonId);
-  };
+  }, [progress.completedLessons]);
 
   const getTodayXP = () => {
     return progress.dailyXP || 0;
@@ -164,14 +165,14 @@ export const ProgressProvider = ({ children }) => {
     return last7Days;
   };
 
-  const addStudyTime = (minutes) => {
+  const addStudyTime = useCallback((minutes) => {
     setProgress(prev => ({
       ...prev,
       totalStudyTime: prev.totalStudyTime + minutes
     }));
-  };
+  }, []);
 
-  const resetProgress = () => {
+  const resetProgress = useCallback(() => {
     const initialState = {
       xp: 0,
       level: 1,
@@ -182,10 +183,64 @@ export const ProgressProvider = ({ children }) => {
       dailyXP: 0,
       weeklyActivity: [],
       totalStudyTime: 0,
-      startDate: new Date().toISOString()
+      startDate: new Date().toISOString(),
+      lastLesson: null
     };
     setProgress(initialState);
     localStorage.setItem('germanAppProgress', JSON.stringify(initialState));
+  }, []);
+
+  const setLastLesson = useCallback((unitId, lessonId) => {
+    setProgress(prev => {
+      // Avoid update if already same
+      if (prev.lastLesson?.unitId === unitId && prev.lastLesson?.lessonId === lessonId) {
+        return prev;
+      }
+      return {
+        ...prev,
+        lastLesson: { unitId, lessonId }
+      };
+    });
+  }, []);
+
+  const getCompletedChapters = (curriculum) => {
+    if (!curriculum || !curriculum.units) return [];
+    
+    const completedChapters = [];
+    
+    curriculum.units.forEach(unit => {
+      const allLessons = unit.lessons || [];
+      const allLessonIds = allLessons.map(lesson => lesson.id);
+      
+      // Check if all lessons in this chapter are completed
+      const isChapterComplete = allLessonIds.length > 0 && 
+        allLessonIds.every(lessonId => progress.completedLessons.includes(lessonId));
+      
+      if (isChapterComplete) {
+        completedChapters.push(unit.id);
+      }
+    });
+    
+    return completedChapters;
+  };
+
+  const getChapterProgress = (curriculum, chapterId) => {
+    if (!curriculum || !curriculum.units) return { completed: 0, total: 0, percentage: 0 };
+    
+    const chapter = curriculum.units.find(unit => unit.id === chapterId);
+    if (!chapter) return { completed: 0, total: 0, percentage: 0 };
+    
+    const allLessons = chapter.lessons || [];
+    const totalLessons = allLessons.length;
+    const completedCount = allLessons.filter(lesson => 
+      progress.completedLessons.includes(lesson.id)
+    ).length;
+    
+    return {
+      completed: completedCount,
+      total: totalLessons,
+      percentage: totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
+    };
   };
 
   return (
@@ -197,7 +252,10 @@ export const ProgressProvider = ({ children }) => {
       getTodayXP,
       getWeeklyActivity,
       addStudyTime,
-      resetProgress
+     resetProgress,
+      getCompletedChapters,
+      getChapterProgress,
+      setLastLesson
     }}>
       {children}
     </ProgressContext.Provider>

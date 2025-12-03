@@ -25,6 +25,9 @@
   --gradient-dark: linear-gradient(135deg, #18181B 0%, #09090B 100%);
   /* Solid Black */
 
+  --accent-burgundy: #DC2626;
+  /* Added for reset button */
+
   /* Removed Glass Gradient, replaced with solid white */
   --gradient-glass: #FFFFFF;
 
@@ -57,18 +60,24 @@
   --transition-bounce: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Dark Theme Overrides - High Contrast Dark */
+/* Dark Theme Overrides - Soft Cloudy Dark */
 [data-theme="dark"] {
-  --bg-primary: #000000;
-  --bg-secondary: #111111;
-  --bg-card: #18181B;
+  --bg-primary: #1A1A2E;
+  /* Soft navy blue instead of pure black */
+  --bg-secondary: #25274D;
+  /* Slightly lighter blue-grey */
+  --bg-card: #2E3248;
+  /* Muted blue-grey cards */
 
-  --text-primary: #FFFFFF;
-  --text-secondary: #E4E4E7;
-  --text-muted: #A1A1AA;
+  --text-primary: #E8E9ED;
+  /* Soft white instead of pure white */
+  --text-secondary: #C1C3D4;
+  /* Softer secondary text */
+  --text-muted: #8B8D98;
+  /* More muted grey */
 
-  --shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -152,7 +161,8 @@ h6 {
 
 .btn-secondary {
   background: white;
-  color: var(--text-primary);
+  color: #18181B;
+  /* Force dark text on white button */
   border: 1px solid var(--bg-secondary);
   box-shadow: var(--shadow-sm);
 }
@@ -160,6 +170,26 @@ h6 {
 .btn-secondary:hover {
   background: var(--bg-secondary);
   transform: translateY(-2px);
+}
+
+/* Dark mode specific hover for secondary buttons */
+[data-theme="dark"] .btn-secondary:hover {
+  background: linear-gradient(135deg, #3B3D5E 0%, #4A4D6E 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(100, 149, 237, 0.3);
+  color: white;
+}
+
+.btn-success {
+  background: var(--gradient-success);
+  color: white;
+  box-shadow: var(--shadow-sm);
+  border: none;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Animations */

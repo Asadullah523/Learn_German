@@ -2,68 +2,147 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProgress } from '../context/ProgressContext';
 import Quiz from '../components/Quiz';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { curriculum } from '../data/curriculum';
 
 export default function LessonView() {
   const { unitId, lessonId } = useParams();
   const navigate = useNavigate();
-  const { completeLesson, isLessonCompleted } = useProgress();
+  const { completeLesson, isLessonCompleted, setLastLesson } = useProgress();
   const [lesson, setLesson] = useState(null);
-  const [curriculumData, setCurriculumData] = useState(null);
-  const [error, setError] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
-  // Dynamic import for curriculum to prevent main thread blocking/crashing
+  if (!curriculum || !curriculum.units) {
+    console.error("Curriculum data is missing or invalid");
+    return <div className="p-8 text-red-500">Error: Curriculum data not loaded. Please check console.</div>;
+  }
+
+  // Helper function to format text with bold
+  const formatTextWithBold = (text) => {
+    if (!text) return text;
+    return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  };
+
+  // Get next lesson (across chapters if needed)
+  const getNextLesson = () => {
+    const units = curriculum.units;
+    const currentUnitIndex = units.findIndex(u => u.id === unitId);
+    if (currentUnitIndex === -1) return null;
+    
+    const currentUnit = units[currentUnitIndex];
+    const currentLessonIndex = currentUnit.lessons.findIndex(l => l.id === lessonId);
+    
+    // Try next lesson in same chapter first
+    if (currentLessonIndex < currentUnit.lessons.length - 1) {
+      return {
+        unitId: unitId,
+        lessonId: currentUnit.lessons[currentLessonIndex + 1].id,
+        lesson: currentUnit.lessons[currentLessonIndex + 1]
+      };
+    }
+    
+    // Try first lesson of next chapter
+    if (currentUnitIndex < units.length - 1) {
+      const nextUnit = units[currentUnitIndex + 1];
+      if (nextUnit.lessons.length > 0) {
+        return {
+          unitId: nextUnit.id,
+          lessonId: nextUnit.lessons[0].id,
+          lesson: nextUnit.lessons[0]
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  // Get previous lesson (across chapters if needed)
+  const getPreviousLesson = () => {
+    const units = curriculum.units;
+    const currentUnitIndex = units.findIndex(u => u.id === unitId);
+    if (currentUnitIndex === -1) return null;
+    
+    const currentUnit = units[currentUnitIndex];
+    const currentLessonIndex = currentUnit.lessons.findIndex(l => l.id === lessonId);
+    
+    // Try previous lesson in same chapter first
+    if (currentLessonIndex > 0) {
+      return {
+        unitId: unitId,
+        lessonId: currentUnit.lessons[currentLessonIndex - 1].id,
+        lesson: currentUnit.lessons[currentLessonIndex - 1]
+      };
+    }
+    
+    // Try last lesson of previous chapter
+    if (currentUnitIndex > 0) {
+      const prevUnit = units[currentUnitIndex - 1];
+      if (prevUnit.lessons.length > 0) {
+        const lastLesson = prevUnit.lessons[prevUnit.lessons.length - 1];
+        return {
+          unitId: prevUnit.id,
+          lessonId: lastLesson.id,
+          lesson: lastLesson
+        };
+      }
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
-    import('../data/curriculum')
-      .then(module => {
-        setCurriculumData(module.curriculum);
-      })
-      .catch(err => {
-        console.error("Failed to load curriculum:", err);
-        setError("Failed to load lesson data. Please try again.");
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!curriculumData) return;
-
     console.log("LessonView params:", { unitId, lessonId });
-    const unit = curriculumData.units.find(u => u.id === unitId);
+    const unit = curriculum.units.find(u => u.id === unitId);
     if (unit) {
       const foundLesson = unit.lessons.find(l => l.id === lessonId);
       console.log("Found lesson:", foundLesson);
       setLesson(foundLesson);
+      // Check if lesson is already completed
+      setIsCompleted(isLessonCompleted(lessonId));
+      // Track this as the last lesson viewed
+      if (setLastLesson) {
+        setLastLesson(unitId, lessonId);
+      }
     } else {
       console.error("Unit not found:", unitId);
     }
-  }, [unitId, lessonId, curriculumData]);
+  }, [unitId, lessonId, isLessonCompleted, setLastLesson]);
 
   const handleComplete = () => {
     completeLesson(lesson.id, lesson.xp);
+    setIsCompleted(true); // Immediately update local state
     
     // For quizzes, the Quiz component handles the result view and navigation.
-    // We only want to show the overlay and auto-navigate for regular text lessons.
+    // We only want to show the overlay for regular text lessons.
     if (lesson.type !== 'quiz') {
       setShowCompletion(true);
-      // Delay navigation to show animation
+      // Hide overlay after delay without navigating
       setTimeout(() => {
-        navigate('/');
+        setShowCompletion(false);
       }, 2000);
     }
   };
 
-  if (error) {
-    return (
-      <div className="p-12 text-center text-red-500">
-        <div className="text-xl font-bold mb-2">Error</div>
-        <p>{error}</p>
-        <button onClick={() => navigate('/')} className="mt-4 btn btn-secondary">
-          Back to Dashboard
-        </button>
-      </div>
-    );
-  }
+  // ... (rest of component)
+
+
+
+  const handleNext = () => {
+    const next = getNextLesson();
+    if (next) {
+      navigate(`/learn/${next.unitId}/${next.lessonId}`);
+    }
+  };
+
+  const handlePrevious = () => {
+    const prev = getPreviousLesson();
+    if (prev) {
+      navigate(`/learn/${prev.unitId}/${prev.lessonId}`);
+    }
+  };
+
+
 
   if (!lesson) {
     return (
@@ -123,7 +202,7 @@ export default function LessonView() {
                       )}
                     </div>
                     <div className="vocab-en">{item.en}</div>
-                    {item.context && <div className="vocab-ctx">{item.context}</div>}
+                    {item.context && <div className="vocab-ctx" dangerouslySetInnerHTML={{ __html: formatTextWithBold(item.context) }} />}
                   </div>
                 ))}
               </div>
@@ -166,13 +245,13 @@ export default function LessonView() {
                 <table className="lesson-table">
                   <thead>
                     <tr>
-                      {block.headers.map((h, i) => <th key={i}>{h}</th>)}
+                      {block.headers.map((h, i) => <th key={i} dangerouslySetInnerHTML={{ __html: formatTextWithBold(h) }} />)}
                     </tr>
                   </thead>
                   <tbody>
                     {block.rows.map((row, i) => (
                       <tr key={i}>
-                        {row.map((cell, j) => <td key={j}>{cell}</td>)}
+                        {row.map((cell, j) => <td key={j} dangerouslySetInnerHTML={{ __html: formatTextWithBold(cell) }} />)}
                       </tr>
                     ))}
                   </tbody>
@@ -183,7 +262,7 @@ export default function LessonView() {
             {block.type === 'info' && (
               <div className="info-box">
                 <h4 className="font-bold mb-2">{block.title}</h4>
-                <p>{block.value}</p>
+                <p dangerouslySetInnerHTML={{ __html: formatTextWithBold(block.value) }} />
               </div>
             )}
           </div>
@@ -224,11 +303,35 @@ export default function LessonView() {
         )}
       </div>
 
-      <div className="lesson-footer mt-12 flex justify-center">
-        <button className="btn btn-primary btn-lg" onClick={handleComplete}>
+      <div className="lesson-footer mt-12 flex flex-col items-center gap-6">
+        <button 
+          className={`btn btn-lg w-full md:w-auto ${isCompleted ? 'btn-success' : 'btn-primary'}`} 
+          onClick={handleComplete}
+          disabled={isCompleted}
+        >
           <CheckCircle size={24} className="mr-2" />
-          Complete Chapter
+          {isCompleted ? 'Chapter Completed' : 'Complete Chapter'}
         </button>
+
+        <div className="flex justify-between w-full max-w-md mt-4">
+          <button 
+            className={`btn btn-secondary ${!getPreviousLesson() ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={handlePrevious}
+            disabled={!getPreviousLesson()}
+          >
+            <ChevronLeft size={20} className="mr-2" />
+            Previous
+          </button>
+
+          <button 
+            className={`btn btn-secondary ${!getNextLesson() ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={handleNext}
+            disabled={!getNextLesson()}
+          >
+            Next
+            <ChevronRight size={20} className="ml-2" />
+          </button>
+        </div>
       </div>
 
       {showCompletion && (

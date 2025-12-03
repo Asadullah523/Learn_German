@@ -40,10 +40,11 @@ export default function Dashboard() {
   // Get time of day for greeting
   const hour = new Date().getHours();
   let greeting = 'Good Morning';
-  if (hour < 5) greeting = 'Burning the Midnight Oil? 🌙';
-  else if (hour < 12) greeting = 'Good Morning';
-  else if (hour < 18) greeting = 'Good Afternoon';
-  else greeting = 'Good Evening';
+  if (hour >= 0 && hour < 5) greeting = 'Burning the Midnight Oil? 🌙';
+  else if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+  else if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+  else if (hour >= 17 && hour < 22) greeting = 'Good Evening';
+  else greeting = 'Good Night';
 
   const getUnitProgress = (unit) => {
     const unitLessons = unit.lessons;
@@ -291,35 +292,38 @@ export default function Dashboard() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(255, 255, 255, 0.9); /* Light solid overlay */
+          background: rgba(0, 0, 0, 0.4); /* Darker overlay */
           z-index: 100;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: var(--spacing-md);
           animation: fadeIn 0.2s ease-out;
+          backdrop-filter: blur(4px);
         }
 
         .unit-modal {
-          background: var(--bg-card);
+          background: rgba(20, 20, 25, 0.85); /* Dark glass background */
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
           width: 100%;
           max-width: 600px;
           max-height: 85vh;
           border-radius: var(--radius-xl);
-          box-shadow: var(--shadow-lg);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
           display: flex;
           flex-direction: column;
           position: relative;
           animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           overflow: hidden;
-          border: 1px solid rgba(0,0,0,0.1);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .close-modal-btn {
           position: absolute;
           top: var(--spacing-md);
           right: var(--spacing-md);
-          background: rgba(0,0,0,0.05);
+          background: rgba(255, 255, 255, 0.1);
           border: none;
           width: 40px;
           height: 40px;
@@ -328,21 +332,21 @@ export default function Dashboard() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: var(--text-secondary);
+          color: rgba(255, 255, 255, 0.8);
           transition: all 0.2s;
           z-index: 10;
         }
 
         .close-modal-btn:hover {
-          background: rgba(0,0,0,0.1);
-          color: var(--text-primary);
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
           transform: rotate(90deg);
         }
 
         .modal-header {
           padding: var(--spacing-xl);
-          background: var(--bg-primary);
-          border-bottom: 1px solid rgba(0,0,0,0.1);
+          background: transparent;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           flex-shrink: 0;
         }
 
@@ -350,7 +354,7 @@ export default function Dashboard() {
           font-size: 0.85rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: var(--text-muted);
+          color: rgba(255, 255, 255, 0.6);
           font-weight: 800;
           display: block;
           margin-bottom: var(--spacing-xs);
@@ -360,14 +364,14 @@ export default function Dashboard() {
           font-family: 'Outfit', sans-serif;
           font-size: 2rem;
           font-weight: 800;
-          color: var(--text-primary);
+          color: white;
           margin-bottom: var(--spacing-sm);
           line-height: 1.1;
           padding-right: var(--spacing-xl);
         }
 
         .modal-description {
-          color: var(--text-secondary);
+          color: rgba(255, 255, 255, 0.8);
           line-height: 1.6;
           font-size: 1.05rem;
         }
@@ -378,7 +382,7 @@ export default function Dashboard() {
           display: flex;
           flex-direction: column;
           gap: var(--spacing-md);
-          background: var(--bg-secondary); /* Light grey background for contrast with white cards */
+          background: transparent;
         }
 
         @keyframes fadeIn {
