@@ -108,7 +108,7 @@ export default function UnitCard({ unit, progress, isLocked, onClick }) {
           text-transform: uppercase;
           letter-spacing: 0.1em;
           background: white; /* Solid white for contrast */
-          color: var(--text-primary);
+          color: #18181B; /* Always dark text on white background */
           padding: 4px 10px;
           border-radius: var(--radius-full);
           box-shadow: var(--shadow-sm);

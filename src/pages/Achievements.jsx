@@ -1,9 +1,19 @@
 import React from 'react';
 import { useProgress } from '../context/ProgressContext';
+import { curriculum } from '../data/curriculum';
 import { Trophy, Lock, Star, Award, Flame, BookOpen, Target, Zap, Crown, Medal } from 'lucide-react';
 
 export default function Achievements() {
-  const { progress } = useProgress();
+  const { progress, isLessonCompleted } = useProgress();
+
+  // Calculate completed chapters (units where ALL lessons are done)
+  const getCompletedChaptersCount = () => {
+    return curriculum.units.filter(unit => {
+      return unit.lessons.every(lesson => isLessonCompleted(lesson.id));
+    }).length;
+  };
+
+  const completedChaptersCount = getCompletedChaptersCount();
 
   // Define achievement tiers
   const achievements = [
@@ -26,7 +36,7 @@ export default function Achievements() {
       description: 'Complete 5 chapters',
       icon: Star,
       requirement: 5,
-      currentValue: progress.completedLessons?.length || 0,
+      currentValue: completedChaptersCount,
       tier: 'bronze',
       unit: 'chapters'
     },
@@ -37,7 +47,7 @@ export default function Achievements() {
       description: 'Complete 10 chapters',
       icon: Award,
       requirement: 10,
-      currentValue: progress.completedLessons?.length || 0,
+      currentValue: completedChaptersCount,
       tier: 'silver',
       unit: 'chapters'
     },
@@ -48,7 +58,7 @@ export default function Achievements() {
       description: 'Complete all 15 chapters',
       icon: Crown,
       requirement: 15,
-      currentValue: progress.completedLessons?.length || 0,
+      currentValue: completedChaptersCount,
       tier: 'gold',
       unit: 'chapters'
     },
@@ -203,6 +213,48 @@ export default function Achievements() {
     }
   };
 
+  // Get recently unlocked achievements (last 3)
+  const recentlyUnlocked = enrichedAchievements
+    .filter(a => a.isUnlocked)
+    .slice(-3)
+    .reverse();
+
+  // Circular progress component
+  const CircularProgress = ({ progress, tier }) => {
+    const circumference = 2 * Math.PI * 40;
+    const offset = circumference - (progress / 100) * circumference;
+    
+    return (
+      <svg className="circular-progress" width="100" height="100">
+        <circle
+          className="progress-ring-bg"
+          cx="50"
+          cy="50"
+          r="40"
+          fill="none"
+          stroke="rgba(0,0,0,0.1)"
+          strokeWidth="6"
+        />
+        <circle
+          className="progress-ring-fill"
+          cx="50"
+          cy="50"
+          r="40"
+          fill="none"
+          stroke={getTierColor(tier)}
+          strokeWidth="6"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          transform="rotate(-90 50 50)"
+        />
+        <text x="50" y="55" textAnchor="middle" className="progress-percentage">
+          {progress}%
+        </text>
+      </svg>
+    );
+  };
+
   return (
     <div className="achievements-page animate-fade-in">
       <header className="achievements-header">
@@ -210,65 +262,127 @@ export default function Achievements() {
           <Trophy size={48} className="trophy-icon" />
           <div>
             <h1 className="achievements-title">Achievements 🏆</h1>
-            <p className="achievements-subtitle">Unlock impressive milestones</p>
+            <p className="achievements-subtitle">Unlock impressive milestones on your learning journey</p>
           </div>
         </div>
       </header>
 
-      {/* Stats Overview */}
+      {/* Stats Overview with Animated Counters */}
       <section className="stats-overview">
-        <div className="stat-card">
-          <div className="stat-icon">
+        <div className="stat-card stat-card-1">
+          <div className="stat-icon stat-icon-achievements">
             <Award size={32} />
           </div>
           <div className="stat-info">
-            <div className="stat-value">{unlockedCount}</div>
+            <div className="stat-value animated-counter">{unlockedCount}</div>
             <div className="stat-label">Achievements Unlocked</div>
           </div>
+          <div className="stat-particles"></div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">
+        <div className="stat-card stat-card-2">
+          <div className="stat-icon stat-icon-xp">
             <Star size={32} />
           </div>
           <div className="stat-info">
-            <div className="stat-value">{progress.xp || 0}</div>
+            <div className="stat-value animated-counter">{progress.xp || 0}</div>
             <div className="stat-label">Total XP Earned</div>
           </div>
+          <div className="stat-particles"></div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">
+        <div className="stat-card stat-card-3">
+          <div className="stat-icon stat-icon-streak">
             <Flame size={32} />
           </div>
           <div className="stat-info">
-            <div className="stat-value">{progress.streak || 0}</div>
+            <div className="stat-value animated-counter">{progress.streak || 0}</div>
             <div className="stat-label">Day Streak</div>
           </div>
+          <div className="flame-effect"></div>
         </div>
       </section>
+
+      {/* Recent Achievements */}
+      {recentlyUnlocked.length > 0 && (
+        <section className="recent-achievements-section">
+          <h2 className="section-header">
+            <span className="section-icon">🎉</span>
+            Recently Unlocked
+          </h2>
+          <div className="recent-achievements-grid">
+            {recentlyUnlocked.map(achievement => {
+              const Icon = achievement.icon;
+              return (
+                <div key={achievement.id} className={`recent-achievement tier-${achievement.tier}`}>
+                  <div className="recent-icon-wrapper">
+                    <div className={`recent-icon tier-${achievement.tier}`}>
+                      <Icon size={28} />
+                    </div>
+                    <div className="confetti-burst">🎊</div>
+                  </div>
+                  <div className="recent-info">
+                    <h4 className="recent-title">{achievement.title}</h4>
+                    <p className="recent-tier">{achievement.tier.toUpperCase()}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Achievement Categories */}
       {categories.map(category => (
         <section key={category} className="category-section">
-          <h2 className="category-title">{category}</h2>
+          <h2 className="category-title">
+            <span className="category-icon">
+              {category === 'Learning Milestones' && '📚'}
+              {category === 'Experience Points' && '⚡'}
+              {category === 'Daily Streaks' && '🔥'}
+              {category === 'Lesson Master' && '🎓'}
+            </span>
+            {category}
+          </h2>
           <div className="achievements-grid">
             {enrichedAchievements
               .filter(ach => ach.category === category)
               .map(achievement => {
                 const Icon = achievement.icon;
+                const isNearCompletion = !achievement.isUnlocked && achievement.progress >= 75;
+                
                 return (
                   <div
                     key={achievement.id}
-                    className={`achievement-card ${achievement.isUnlocked ? 'unlocked' : 'locked'} tier-${achievement.tier}`}
+                    className={`achievement-card ${achievement.isUnlocked ? 'unlocked' : 'locked'} tier-${achievement.tier} ${isNearCompletion ? 'near-completion' : ''}`}
                   >
+                    {/* Tier Badge */}
+                    <div className={`tier-badge tier-badge-${achievement.tier}`}>
+                      {achievement.tier.charAt(0).toUpperCase() + achievement.tier.slice(1)}
+                    </div>
+
                     <div className="achievement-icon-wrapper">
-                      <div className={`achievement-icon ${achievement.isUnlocked ? 'unlocked' : ''}`}>
-                        {achievement.isUnlocked ? (
-                          <Icon size={48} />
-                        ) : (
-                          <Lock size={48} />
-                        )}
-                      </div>
-                      {achievement.isUnlocked && <div className="sparkle">✨</div>}
+                      {achievement.isUnlocked ? (
+                        <>
+                          <div className={`achievement-icon unlocked`}>
+                            <Icon size={48} />
+                          </div>
+                          <div className="sparkle sparkle-1">✨</div>
+                          <div className="sparkle sparkle-2">✨</div>
+                          {(achievement.tier === 'gold' || achievement.tier === 'platinum') && (
+                            <>
+                              <div className="particle particle-1">⭐</div>
+                              <div className="particle particle-2">⭐</div>
+                              <div className="particle particle-3">✨</div>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <div className="circular-progress-wrapper">
+                          <CircularProgress progress={achievement.progress} tier={achievement.tier} />
+                          <div className="lock-icon-center">
+                            <Lock size={32} />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="achievement-info">
@@ -277,23 +391,16 @@ export default function Achievements() {
                       
                       {!achievement.isUnlocked && (
                         <div className="achievement-progress">
-                          <div className="progress-bar-mini">
-                            <div 
-                              className="progress-fill-mini" 
-                              style={{ 
-                                width: `${achievement.progress}%`,
-                                background: getTierColor(achievement.tier)
-                              }}
-                            />
-                          </div>
                           <div className="progress-text">
-                            {achievement.currentValue} / {achievement.requirement} {achievement.unit}
+                            <span className="progress-current">{achievement.currentValue}</span>
+                            <span className="progress-separator">/</span>
+                            <span className="progress-total">{achievement.requirement} {achievement.unit}</span>
                           </div>
                         </div>
                       )}
 
                       {achievement.isUnlocked && (
-                        <div className="achievement-badge">
+                        <div className="achievement-badge achievement-badge-unlocked">
                           <Trophy size={16} />
                           <span>Unlocked!</span>
                         </div>
@@ -314,6 +421,7 @@ export default function Achievements() {
           padding-bottom: 100px;
         }
 
+        /* Header */
         .achievements-header {
           text-align: center;
           margin-bottom: var(--spacing-2xl);
@@ -338,6 +446,7 @@ export default function Achievements() {
         .trophy-icon {
           color: #FFD700;
           animation: float 3s ease-in-out infinite;
+          filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
         }
 
         @keyframes float {
@@ -358,6 +467,7 @@ export default function Achievements() {
           font-size: 1.1rem;
         }
 
+        /* Stats Overview with Enhanced Effects */
         .stats-overview {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -374,7 +484,9 @@ export default function Achievements() {
           display: flex;
           align-items: center;
           gap: var(--spacing-md);
-          transition: all var(--transition-base);
+          transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+          position: relative;
+          overflow: hidden;
         }
 
         [data-theme="dark"] .stat-card {
@@ -382,9 +494,13 @@ export default function Achievements() {
         }
 
         .stat-card:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-md);
+          transform: translateY(-8px) scale(1.03);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
+
+        .stat-card-1:hover { border-color: rgba(255,215,0,0.5); }
+        .stat-card-2:hover { border-color: rgba(59,130,246,0.5); }
+        .stat-card-3:hover { border-color: rgba(239,68,68,0.5); }
 
         .stat-icon {
           width: 60px;
@@ -396,10 +512,25 @@ export default function Achievements() {
           justify-content: center;
           color: white;
           flex-shrink: 0;
+          position: relative;
+          z-index: 2;
+        }
+
+        .stat-icon-achievements { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); }
+        .stat-icon-xp { background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); }
+        .stat-icon-streak { 
+          background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); 
+          animation: fire-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes fire-pulse {
+          0%, 100% { filter: brightness(1); }
+          50% { filter: brightness(1.3); }
         }
 
         .stat-info {
           flex: 1;
+          z-index: 2;
         }
 
         .stat-value {
@@ -410,12 +541,163 @@ export default function Achievements() {
           line-height: 1;
         }
 
+        .animated-counter {
+          animation: count-up 0.8s ease-out;
+        }
+
+        @keyframes count-up {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
         .stat-label {
           font-size: 0.9rem;
           color: var(--text-muted);
           margin-top: var(--spacing-xs);
         }
 
+        /* Particle Effects */
+        .stat-particles, .flame-effect {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .stat-card:hover .stat-particles::after {
+          content: '✨';
+          position: absolute;
+          top: 20%;
+          right: 10%;
+          animation: float-particle 2s ease-out infinite;
+          font-size: 1.5rem;
+        }
+
+        @keyframes float-particle {
+          0% { opacity: 0; transform: translateY(0); }
+          50% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        /* Recent Achievements Section */
+        .recent-achievements-section {
+          margin-bottom: var(--spacing-2xl);
+          background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.1));
+          border-radius: var(--radius-xl);
+          padding: var(--spacing-xl);
+          border: 2px solid rgba(255,215,0,0.3);
+        }
+
+        [data-theme="dark"] .recent-achievements-section {
+          background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(255,165,0,0.05));
+        }
+
+        .section-header {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: var(--spacing-lg);
+          font-family: 'Outfit', sans-serif;
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+        }
+
+        .section-icon {
+          font-size: 2rem;
+          animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+        }
+
+        .recent-achievements-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: var(--spacing-md);
+        }
+
+        .recent-achievement {
+          background: var(--bg-card);
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-md);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+          transition: all 0.3s;
+          border: 2px solid rgba(0,0,0,0.1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        [data-theme="dark"] .recent-achievement {
+          border-color: rgba(255,255,255,0.1);
+        }
+
+        .recent-achievement:hover {
+          transform: translateX(8px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .recent-achievement.tier-gold {
+          border-color: rgba(255,215,0,0.5);
+        }
+
+        .recent-achievement.tier-platinum {
+          border-color: rgba(229,228,226,0.5);
+        }
+
+        .recent-icon-wrapper {
+          position: relative;
+        }
+
+        .recent-icon {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+
+        .recent-icon.tier-bronze { background: linear-gradient(135deg, #CD7F32, #B87333); }
+        .recent-icon.tier-silver { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); }
+        .recent-icon.tier-gold { background: linear-gradient(135deg, #FFD700, #FFA500); }
+        .recent-icon.tier-platinum { background: linear-gradient(135deg, #E5E4E2, #C9C9C9); color: #333; }
+
+        .confetti-burst {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          font-size: 1.2rem;
+          animation: confetti-pop 2s ease-in-out infinite;
+        }
+
+        @keyframes confetti-pop {
+          0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+          50% { transform: scale(1) rotate(180deg); opacity: 1; }
+        }
+
+        .recent-title {
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 4px;
+        }
+
+        .recent-tier {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          font-weight: 600;
+          letter-spacing: 0.05em;
+        }
+
+        /* Category Section */
         .category-section {
           margin-bottom: var(--spacing-2xl);
         }
@@ -426,24 +708,35 @@ export default function Achievements() {
           color: var(--text-primary);
           margin-bottom: var(--spacing-xl);
           font-family: 'Outfit', sans-serif;
-          padding-left: var(--spacing-sm);
-          border-left: 4px solid var(--gradient-primary);
+          padding-left: var(--spacing-md);
+          border-left: 4px solid #2563EB;
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
         }
 
+        .category-icon {
+          font-size: 2rem;
+        }
+
+        /* Achievements Grid */
         .achievements-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
           gap: var(--spacing-xl);
         }
 
+        /* Achievement Card with 3D Effects */
         .achievement-card {
           background: var(--bg-card);
           border-radius: var(--radius-xl);
           padding: var(--spacing-xl);
           border: 2px solid rgba(0, 0, 0, 0.1);
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
           position: relative;
           overflow: hidden;
+          transform-style: preserve-3d;
+          perspective: 1000px;
         }
 
         [data-theme="dark"] .achievement-card {
@@ -451,16 +744,35 @@ export default function Achievements() {
         }
 
         .achievement-card.locked {
-          opacity: 0.6;
+          opacity: 0.7;
         }
 
         .achievement-card.unlocked {
-          box-shadow: var(--shadow-lg);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
         .achievement-card.unlocked:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          transform: translateY(-12px) rotateX(2deg) rotateY(2deg) scale(1.03);
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Near Completion Glow */
+        .achievement-card.near-completion {
+          animation: near-completion-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes near-completion-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+          50% { box-shadow: 0 0 40px rgba(59,130,246,0.6); }
+        }
+
+        /* Tier-specific Effects */
+        .achievement-card.tier-bronze.unlocked:hover {
+          border-color: #CD7F32;
+        }
+
+        .achievement-card.tier-silver.unlocked:hover {
+          border-color: #C0C0C0;
         }
 
         .achievement-card.tier-gold.unlocked {
@@ -468,17 +780,65 @@ export default function Achievements() {
           box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
         }
 
+        .achievement-card.tier-gold.unlocked:hover {
+          box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
         .achievement-card.tier-platinum.unlocked {
           border-color: #E5E4E2;
           box-shadow: 0 0 30px rgba(229, 228, 226, 0.4);
         }
 
+        .achievement-card.tier-platinum.unlocked:hover {
+          box-shadow: 0 0 50px rgba(229, 228, 226, 0.6);
+        }
+
+        /* Tier Badge */
+        .tier-badge {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          padding: 4px 12px;
+          border-radius: var(--radius-full);
+          font-size: 0.7rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          z-index: 10;
+        }
+
+        .tier-badge-bronze {
+          background: linear-gradient(135deg, #CD7F32, #B87333);
+          color: white;
+          box-shadow: 0 2px 8px rgba(205,127,50,0.3);
+        }
+
+        .tier-badge-silver {
+          background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+          color: white;
+          box-shadow: 0 2px 8px rgba(192,192,192,0.3);
+        }
+
+        .tier-badge-gold {
+          background: linear-gradient(135deg, #FFD700, #FFA500);
+          color: #333;
+          box-shadow: 0 2px 8px rgba(255,215,0,0.4);
+        }
+
+        .tier-badge-platinum {
+          background: linear-gradient(135deg, #E5E4E2, #C9C9C9);
+          color: #333;
+          box-shadow: 0 2px 8px rgba(229,228,226,0.4);
+        }
+
+        /* Achievement Icon Wrapper */
         .achievement-icon-wrapper {
           display: flex;
           justify-content: center;
           align-items: center;
           margin-bottom: var(--spacing-lg);
           position: relative;
+          min-height: 120px;
         }
 
         .achievement-icon {
@@ -488,12 +848,17 @@ export default function Achievements() {
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.3s;
+          transition: all 0.4s;
           position: relative;
         }
 
         .achievement-icon.unlocked {
           animation: glow-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+          0%, 100% { filter: brightness(1); transform: scale(1); }
+          50% { filter: brightness(1.15); transform: scale(1.05); }
         }
 
         .tier-bronze .achievement-icon.unlocked {
@@ -520,35 +885,104 @@ export default function Achievements() {
           box-shadow: 0 0 40px rgba(229, 228, 226, 0.7);
         }
 
-        .achievement-icon:not(.unlocked) {
-          background: rgba(0, 0, 0, 0.1);
+        /* Circular Progress */
+        .circular-progress-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .circular-progress {
+          transform: rotate(-90deg);
+        }
+
+        .progress-ring-fill {
+          transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-percentage {
+          font-family: 'Outfit', sans-serif;
+          font-weight: 700;
+          font-size: 1rem;
+          fill: var(--text-primary);
+          transform: rotate(90deg);
+          transform-origin: center;
+        }
+
+        .lock-icon-center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
           color: var(--text-muted);
-          border: 2px dashed rgba(0, 0, 0, 0.2);
+          opacity: 0.6;
         }
 
-        [data-theme="dark"] .achievement-icon:not(.unlocked) {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: rgba(255, 255, 255, 0.2);
-        }
-
+        /* Sparkles and Particles */
         .sparkle {
           position: absolute;
-          top: -5px;
-          right: -5px;
           font-size: 1.5rem;
-          animation: sparkle 2s ease-in-out infinite;
+          pointer-events: none;
         }
 
-        @keyframes sparkle {
-          0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
-          50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        .sparkle-1 {
+          top: -10px;
+          right: -10px;
+          animation: sparkle-rotate 3s ease-in-out infinite;
         }
 
-        @keyframes glow-pulse {
-          0%, 100% { filter: brightness(1); }
-          50% { filter: brightness(1.2); }
+        .sparkle-2 {
+          bottom: -10px;
+          left: -10px;
+          animation: sparkle-rotate 3s ease-in-out infinite 1.5s;
         }
 
+        @keyframes sparkle-rotate {
+          0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+
+        .particle {
+          position: absolute;
+          font-size: 1.2rem;
+          pointer-events: none;
+          animation: particle-float 4s ease-in-out infinite;
+        }
+
+        .particle-1 {
+          top: 10%;
+          right: 5%;
+          animation-delay: 0s;
+        }
+
+        .particle-2 {
+          bottom: 15%;
+          left: 10%;
+          animation-delay: 1.3s;
+        }
+
+        .particle-3 {
+          top: 50%;
+          right: 8%;
+          animation-delay: 2.6s;
+        }
+
+        @keyframes particle-float {
+          0%, 100% { 
+            opacity: 0; 
+            transform: translateY(0) scale(0.5); 
+          }
+          10%, 90% {
+            opacity: 0.8;
+          }
+          50% { 
+            opacity: 1; 
+            transform: translateY(-20px) scale(1); 
+          }
+        }
+
+        /* Achievement Info */
         .achievement-info {
           text-align: center;
         }
@@ -565,37 +999,36 @@ export default function Achievements() {
           font-size: 0.9rem;
           color: var(--text-muted);
           margin-bottom: var(--spacing-md);
+          line-height: 1.5;
         }
 
         .achievement-progress {
           margin-top: var(--spacing-md);
         }
 
-        .progress-bar-mini {
-          height: 8px;
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: var(--radius-full);
-          overflow: hidden;
-          margin-bottom: var(--spacing-xs);
-        }
-
-        [data-theme="dark"] .progress-bar-mini {
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-fill-mini {
-          height: 100%;
-          border-radius: var(--radius-full);
-          transition: width 0.5s ease-out;
-        }
-
         .progress-text {
-          font-size: 0.75rem;
-          color: var(--text-muted);
+          font-size: 0.9rem;
+          color: var(--text-secondary);
           font-weight: 600;
         }
 
-        .achievement-badge {
+        .progress-current {
+          color: var(--text-primary);
+          font-weight: 800;
+          font-size: 1.1rem;
+        }
+
+        .progress-separator {
+          margin: 0 4px;
+          color: var(--text-muted);
+        }
+
+        .progress-total {
+          color: var(--text-muted);
+        }
+
+        /* Achievement Badge */
+        .achievement-badge-unlocked {
           display: inline-flex;
           align-items: center;
           gap: var(--spacing-xs);
@@ -606,8 +1039,15 @@ export default function Achievements() {
           font-size: 0.85rem;
           font-weight: 600;
           margin-top: var(--spacing-md);
+          animation: badge-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
+        @keyframes badge-appear {
+          from { opacity: 0; transform: scale(0.8); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
           .achievements-page {
             padding: var(--spacing-md) var(--spacing-sm);
@@ -627,6 +1067,14 @@ export default function Achievements() {
 
           .stats-overview {
             grid-template-columns: 1fr;
+          }
+
+          .recent-achievements-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .achievement-card.unlocked:hover {
+            transform: translateY(-8px) scale(1.02);
           }
         }
       `}</style>

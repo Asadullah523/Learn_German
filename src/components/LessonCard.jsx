@@ -106,21 +106,35 @@ export default function LessonCard({ lesson, unitId, isCompleted, isLocked }) {
           font-family: 'Outfit', sans-serif;
           font-size: 1.05rem;
           font-weight: 700;
-          color: var(--text-primary);
+          color: #18181B;
           margin-bottom: 4px;
+        }
+
+        .lesson-card.locked .lesson-title {
+          color: var(--text-primary);
         }
 
         .lesson-meta {
           display: flex;
           gap: 12px;
           font-size: 0.75rem;
-          color: var(--text-muted);
+          font-size: 0.75rem;
+          color: #666666;
+          text-transform: uppercase;
           text-transform: uppercase;
           font-weight: 700;
           letter-spacing: 0.05em;
         }
 
+        .lesson-card.locked .lesson-meta {
+          color: var(--text-muted);
+        }
+
         .lesson-xp {
+          color: #333333;
+        }
+
+        .lesson-card.locked .lesson-xp {
           color: var(--text-secondary);
         }
 
