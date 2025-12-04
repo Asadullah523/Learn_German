@@ -6,10 +6,12 @@ import { useProgress } from '../context/ProgressContext';
 import Quiz from '../components/Quiz';
 import { ArrowLeft, CheckCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { curriculum } from '../data/curriculum';
+import { useSound } from '../hooks/useSound';
 
 export default function LessonView() {
   const { unitId, lessonId } = useParams();
   const navigate = useNavigate();
+  const sounds = useSound();
   const { completeLesson, isLessonCompleted, setLastLesson } = useProgress();
   const [lesson, setLesson] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -108,6 +110,7 @@ export default function LessonView() {
   const handleComplete = () => {
     completeLesson(lesson.id, lesson.xp);
     setIsCompleted(true); 
+    sounds.notification();
     
     if (lesson.type !== 'quiz') {
       setShowCompletion(true);

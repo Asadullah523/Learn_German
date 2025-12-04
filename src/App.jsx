@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { ProgressProvider } from './context/ProgressContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
+import { SoundProvider } from './context/SoundContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import LessonView from './pages/LessonView';
@@ -14,13 +15,15 @@ import Learn from './pages/Learn';
 function App() {
   return (
     <ThemeProvider>
-      <ToastProvider>
-        <ProgressProvider>
-          <BrowserRouter>
-            <AnimatedRoutes />
-          </BrowserRouter>
-        </ProgressProvider>
-      </ToastProvider>
+      <SoundProvider>
+        <ToastProvider>
+          <ProgressProvider>
+            <BrowserRouter>
+              <AnimatedRoutes />
+            </BrowserRouter>
+          </ProgressProvider>
+        </ToastProvider>
+      </SoundProvider>
     </ThemeProvider>
   );
 }

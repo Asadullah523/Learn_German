@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useProgress } from '../context/ProgressContext';
 import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
+import { useSoundSettings } from '../context/SoundContext';
 import { 
   Settings as SettingsIcon, 
   Moon, 
@@ -14,13 +15,15 @@ import {
   Shield, 
   HelpCircle,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  VolumeX
 } from 'lucide-react';
 
 export default function Settings() {
   const { resetProgress, progress } = useProgress();
   const { isDark, toggleTheme } = useTheme();
   const { showToast } = useToast();
+  const { soundEnabled, toggleSound } = useSoundSettings();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleReset = () => {
@@ -102,14 +105,25 @@ export default function Settings() {
 
       <SettingSection title="Preferences">
         <SettingRow 
-          icon={Volume2}
+          icon={soundEnabled ? Volume2 : VolumeX}
           label="Sound Effects"
           description="Play sounds for correct/incorrect answers"
           action={
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-400 uppercase">Coming Soon</span>
-              <div className="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full opacity-50 cursor-not-allowed"></div>
-            </div>
+            <button 
+              onClick={toggleSound}
+              className={`
+                relative w-14 h-8 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
+                ${soundEnabled ? 'bg-green-600' : 'bg-slate-300 dark:bg-slate-700'}
+              `}
+            >
+              <motion.div 
+                layout
+                className="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center"
+                animate={{ x: soundEnabled ? 24 : 0 }}
+              >
+                {soundEnabled ? <Volume2 size={14} className="text-green-600" /> : <VolumeX size={14} className="text-slate-500" />}
+              </motion.div>
+            </button>
           }
         />
         <SettingRow 

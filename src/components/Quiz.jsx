@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, Trophy, ArrowRight, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSound } from '../hooks/useSound';
 
 export default function Quiz({ data, onComplete }) {
   const navigate = useNavigate();
+  const sounds = useSound();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -16,13 +18,19 @@ export default function Quiz({ data, onComplete }) {
   const handleOptionClick = (index) => {
     if (isAnswered) return;
     setSelectedOption(index);
+    sounds.click();
   };
 
   const handleCheck = () => {
     if (selectedOption === null) return;
     
     const isCorrect = selectedOption === currentQuestion.correct;
-    if (isCorrect) setScore(score + 1);
+    if (isCorrect) {
+      setScore(score + 1);
+      sounds.correct();
+    } else {
+      sounds.incorrect();
+    }
     
     setIsAnswered(true);
   };
@@ -34,6 +42,7 @@ export default function Quiz({ data, onComplete }) {
       setIsAnswered(false);
     } else {
       setShowResult(true);
+      sounds.success();
       onComplete(score + (selectedOption === currentQuestion.correct ? 0 : 0)); // Add last point if correct
     }
   };
