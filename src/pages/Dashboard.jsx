@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useProgress } from '../context/ProgressContext';
 import { curriculum } from '../data/curriculum';
 import DailyProgress from '../components/DailyProgress';
@@ -7,6 +8,21 @@ import MotivationalQuote from '../components/MotivationalQuote';
 import UnitCard from '../components/UnitCard';
 import LessonCard from '../components/LessonCard';
 import { X } from 'lucide-react';
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
 export default function Dashboard() {
   const { progress, isLessonCompleted } = useProgress();
@@ -63,360 +79,178 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container animate-fade-in">
+    <div className="max-w-7xl mx-auto pb-24 space-y-12">
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="greeting-box">
-          <h1 className="greeting">
-            <span className="greeting-text">{greeting}</span>
-            <span className="greeting-wave">👋</span>
-          </h1>
-          <p className="hero-subtitle">Ready to continue your German journey?</p>
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative text-center py-12"
+      >
+        <div className="mb-8">
+          <motion.h1 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, type: "spring" }}
+            className="font-heading font-extrabold text-4xl md:text-6xl mb-4 flex flex-col md:flex-row items-center justify-center gap-4 text-slate-900 dark:text-white"
+          >
+            <span className="bg-gradient-dark dark:bg-gradient-to-r dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+              {greeting}
+            </span>
+            <motion.span 
+              animate={{ rotate: [0, 14, -8, 14, -4, 10, 0, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1 }}
+              className="inline-block origin-bottom-right"
+            >
+              👋
+            </motion.span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-xl text-slate-500 dark:text-slate-400 font-medium"
+          >
+            Ready to continue your German journey?
+          </motion.p>
         </div>
         
-        <div className="overall-stats-bar glass-card">
-          <div className="stat-item">
-            <span className="stat-value text-gradient">{progressPercentage}%</span>
-            <span className="stat-label">Total Progress</span>
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
+          whileHover={{ scale: 1.02 }}
+          className="inline-flex flex-col md:flex-row items-center gap-8 p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700"
+        >
+          <div className="flex flex-col items-center">
+            <span className="font-heading font-black text-4xl bg-gradient-primary bg-clip-text text-transparent">
+              {progressPercentage}%
+            </span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Total Progress</span>
           </div>
-          <div className="stat-divider"></div>
-          <div className="stat-item">
-            <span className="stat-value">{completedCount}</span>
-            <span className="stat-label">Lessons Done</span>
+          <div className="hidden md:block w-px h-12 bg-slate-200 dark:bg-slate-700"></div>
+          <div className="flex flex-col items-center">
+            <span className="font-heading font-black text-4xl text-slate-800 dark:text-white">
+              {completedCount}
+            </span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Lessons Done</span>
           </div>
-          <div className="stat-divider"></div>
-          <div className="stat-item">
-            <span className="stat-value">{progress.xp}</span>
-            <span className="stat-label">Total XP</span>
+          <div className="hidden md:block w-px h-12 bg-slate-200 dark:bg-slate-700"></div>
+          <div className="flex flex-col items-center">
+            <span className="font-heading font-black text-4xl text-slate-800 dark:text-white">
+              {progress.xp}
+            </span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Total XP</span>
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       {/* Motivation Grid */}
-      <section className="motivation-section">
-        <div className="motivation-grid">
+      <motion.section 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.5 }}
+        className="grid grid-cols-1 md:grid-cols-5 gap-6"
+      >
+        <div className="md:col-span-3 h-full">
           <DailyProgress />
+        </div>
+        <div className="md:col-span-2 h-full">
           <MotivationalQuote />
         </div>
-      </section>
+      </motion.section>
 
       {/* Units Grid */}
-      <section className="units-section">
-        <h2 className="section-title">Your Learning Path</h2>
-        <div className="units-grid">
+      <section>
+        <motion.h2 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.7 }}
+          className="font-heading font-bold text-3xl text-slate-900 dark:text-white mb-8"
+        >
+          Your Learning Path
+        </motion.h2>
+        <motion.div 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {curriculum.units.map((unit, index) => (
-            <UnitCard
-              key={unit.id}
-              unit={unit}
-              progress={getUnitProgress(unit)}
-              isLocked={isUnitLocked(index)}
-              onClick={() => handleUnitClick(unit)}
-            />
+            <motion.div key={unit.id} variants={item} className="h-full">
+              <UnitCard
+                unit={unit}
+                progress={getUnitProgress(unit)}
+                isLocked={isUnitLocked(index)}
+                onClick={() => handleUnitClick(unit)}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* Expanded Unit View (Modal/Overlay) */}
-      {selectedUnit && (
-        <div className="unit-modal-overlay" onClick={closeUnitModal}>
-          <div className="unit-modal" onClick={e => e.stopPropagation()}>
-            <button className="close-modal-btn" onClick={closeUnitModal}>
-              <X size={24} />
-            </button>
-            
-            <div className="modal-header">
-              <span className="modal-subtitle">Unit {selectedUnit.id.replace('ch', '')}</span>
-              <h2 className="modal-title">{selectedUnit.title.split(':')[1] || selectedUnit.title}</h2>
-              <p className="modal-description">{selectedUnit.description}</p>
-            </div>
+      <AnimatePresence>
+        {selectedUnit && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" 
+            onClick={closeUnitModal}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-full max-w-2xl max-h-[85vh] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col" 
+              onClick={e => e.stopPropagation()}
+            >
+              <button 
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-white/70 hover:bg-slate-200 dark:hover:bg-white/20 hover:text-slate-900 dark:hover:text-white transition-colors z-10" 
+                onClick={closeUnitModal}
+              >
+                <X size={24} />
+              </button>
+              
+              <div className="p-8 border-b border-slate-100 dark:border-white/10 bg-gradient-to-b from-slate-50/50 to-transparent dark:from-white/5 dark:to-transparent">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-white/60 mb-2 block">
+                  Unit {selectedUnit.id.replace('ch', '')}
+                </span>
+                <h2 className="font-heading font-bold text-3xl text-slate-900 dark:text-white mb-2 leading-tight pr-8">
+                  {selectedUnit.title.split(':')[1] || selectedUnit.title}
+                </h2>
+                <p className="text-lg text-slate-600 dark:text-white/80 leading-relaxed">
+                  {selectedUnit.description}
+                </p>
+              </div>
 
-            <div className="lessons-list">
-              {selectedUnit.lessons.map((lesson, index) => {
-                const isLocked = index > 0 && !isLessonCompleted(selectedUnit.lessons[index - 1].id);
-                
-                return (
-                  <LessonCard
-                    key={lesson.id}
-                    lesson={lesson}
-                    unitId={selectedUnit.id}
-                    isCompleted={isLessonCompleted(lesson.id)}
-                    isLocked={isLocked}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        .dashboard-container {
-          padding: var(--spacing-xl) var(--spacing-md);
-          max-width: 1200px;
-          margin: 0 auto;
-          padding-bottom: 100px;
-        }
-
-        /* Hero Section */
-        .hero-section {
-          text-align: center;
-          margin-bottom: var(--spacing-2xl);
-          position: relative;
-        }
-
-        .greeting {
-          font-family: 'Outfit', sans-serif;
-          font-size: 3.5rem;
-          font-weight: 800;
-          color: var(--text-primary);
-          margin-bottom: var(--spacing-sm);
-          letter-spacing: -0.03em;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-        }
-
-        .greeting-text {
-          background: var(--gradient-dark);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        [data-theme="dark"] .greeting-text {
-          background: linear-gradient(to right, #fff, #ccc);
-          -webkit-background-clip: text;
-        }
-
-        .greeting-wave {
-          display: inline-block;
-          animation: wave 2s infinite;
-          transform-origin: 70% 70%;
-        }
-
-        @keyframes wave {
-          0% { transform: rotate(0deg); }
-          10% { transform: rotate(14deg); }
-          20% { transform: rotate(-8deg); }
-          30% { transform: rotate(14deg); }
-          40% { transform: rotate(-4deg); }
-          50% { transform: rotate(10deg); }
-          60% { transform: rotate(0deg); }
-          100% { transform: rotate(0deg); }
-        }
-
-        .hero-subtitle {
-          font-size: 1.25rem;
-          color: var(--text-secondary);
-          margin-bottom: var(--spacing-xl);
-          font-weight: 500;
-        }
-
-        .overall-stats-bar {
-          display: inline-flex;
-          align-items: center;
-          padding: var(--spacing-lg) var(--spacing-2xl);
-          gap: var(--spacing-2xl);
-          background: white; /* Solid white */
-          border: 1px solid rgba(0,0,0,0.1);
-          box-shadow: var(--shadow-lg);
-          border-radius: var(--radius-xl);
-        }
-
-        .stat-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .stat-value {
-          font-size: 2rem;
-          font-weight: 800;
-          color: var(--text-primary);
-          line-height: 1;
-          font-family: 'Outfit', sans-serif;
-        }
-
-        .text-gradient {
-          background: var(--gradient-primary);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label {
-          font-size: 0.75rem;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--text-muted);
-          font-weight: 700;
-          margin-top: 8px;
-        }
-
-        .stat-divider {
-          width: 1px;
-          height: 40px;
-          background: var(--text-muted);
-          opacity: 0.2;
-        }
-
-        /* Motivation Section */
-        .motivation-section {
-          margin-bottom: var(--spacing-2xl);
-        }
-
-        .motivation-grid {
-          display: grid;
-          grid-template-columns: 1.5fr 1fr;
-          gap: var(--spacing-lg);
-        }
-
-        /* Units Section */
-        .section-title {
-          font-family: 'Outfit', sans-serif;
-          font-size: 2rem;
-          color: var(--text-primary);
-          margin-bottom: var(--spacing-lg);
-          font-weight: 700;
-        }
-
-        .units-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: var(--spacing-lg);
-        }
-
-        /* Modal / Expanded View */
-        .unit-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.4); /* Darker overlay */
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: var(--spacing-md);
-          animation: fadeIn 0.2s ease-out;
-          backdrop-filter: blur(4px);
-        }
-
-        .unit-modal {
-          background: rgba(20, 20, 25, 0.85); /* Dark glass background */
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          width: 100%;
-          max-width: 600px;
-          max-height: 85vh;
-          border-radius: var(--radius-xl);
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .close-modal-btn {
-          position: absolute;
-          top: var(--spacing-md);
-          right: var(--spacing-md);
-          background: rgba(255, 255, 255, 0.1);
-          border: none;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          color: rgba(255, 255, 255, 0.8);
-          transition: all 0.2s;
-          z-index: 10;
-        }
-
-        .close-modal-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
-          transform: rotate(90deg);
-        }
-
-        .modal-header {
-          padding: var(--spacing-xl);
-          background: transparent;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          flex-shrink: 0;
-        }
-
-        .modal-subtitle {
-          font-size: 0.85rem;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: rgba(255, 255, 255, 0.6);
-          font-weight: 800;
-          display: block;
-          margin-bottom: var(--spacing-xs);
-        }
-
-        .modal-title {
-          font-family: 'Outfit', sans-serif;
-          font-size: 2rem;
-          font-weight: 800;
-          color: white;
-          margin-bottom: var(--spacing-sm);
-          line-height: 1.1;
-          padding-right: var(--spacing-xl);
-        }
-
-        .modal-description {
-          color: rgba(255, 255, 255, 0.8);
-          line-height: 1.6;
-          font-size: 1.05rem;
-        }
-
-        .lessons-list {
-          padding: var(--spacing-lg);
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-md);
-          background: transparent;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-          from { transform: translateY(40px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-          .motivation-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .overall-stats-bar {
-            width: 100%;
-            justify-content: space-between;
-            padding: var(--spacing-lg);
-            gap: var(--spacing-sm);
-            flex-direction: row;
-          }
-          
-          .stat-label {
-            font-size: 0.65rem;
-          }
-          
-          .greeting {
-            font-size: 2.5rem;
-          }
-        }
-      `}</style>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                {selectedUnit.lessons.map((lesson, index) => {
+                  const isLocked = index > 0 && !isLessonCompleted(selectedUnit.lessons[index - 1].id);
+                  
+                  return (
+                    <motion.div
+                      key={lesson.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <LessonCard
+                        lesson={lesson}
+                        unitId={selectedUnit.id}
+                        isCompleted={isLessonCompleted(lesson.id)}
+                        isLocked={isLocked}
+                      />
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

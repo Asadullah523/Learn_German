@@ -1,5 +1,6 @@
 import React from 'react';
 import { Lock, Play, Trophy, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function UnitCard({ unit, progress, isLocked, onClick }) {
   const { totalLessons, completedLessons } = progress;
@@ -7,246 +8,85 @@ export default function UnitCard({ unit, progress, isLocked, onClick }) {
   const isCompleted = percentComplete === 100;
 
   return (
-    <div 
+    <motion.div 
+      whileHover={!isLocked ? { y: -5, scale: 1.02 } : {}}
+      whileTap={!isLocked ? { scale: 0.98 } : {}}
       onClick={!isLocked ? onClick : undefined}
-      className={`unit-card group ${isLocked ? 'locked' : 'unlocked'} ${isCompleted ? 'completed' : ''}`}
+      className={`
+        relative overflow-hidden rounded-2xl border transition-all duration-300 h-full flex flex-col
+        ${isLocked 
+          ? 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-75 cursor-not-allowed grayscale' 
+          : 'glass-card cursor-pointer border-white/20 dark:border-white/10'
+        }
+        ${isCompleted ? 'ring-2 ring-green-500/50' : ''}
+      `}
     >
-      {/* Card Header / Background */}
-      <div className="card-header">
-        <div className="header-content">
-          <span className="unit-badge">Unit {unit.id.replace('ch', '')}</span>
-          {isCompleted && <div className="completed-badge"><Star size={12} fill="currentColor" /> Done</div>}
+      {/* Card Header */}
+      <div className={`
+        relative p-6 text-white overflow-hidden
+        ${isCompleted ? 'bg-gradient-success' : 'bg-gradient-primary'}
+      `}>
+        <div className="relative z-10 flex justify-between items-start mb-2">
+          <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider">
+            Unit {unit.id.replace('ch', '')}
+          </span>
+          {isCompleted && (
+            <span className="flex items-center gap-1 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold">
+              <Star size={12} fill="currentColor" /> Done
+            </span>
+          )}
         </div>
-        <h3 className="unit-title">{unit.title.split(':')[1] || unit.title}</h3>
+        <h3 className="relative z-10 font-heading font-bold text-2xl leading-tight text-white drop-shadow-sm">
+          {unit.title.split(':')[1] || unit.title}
+        </h3>
+        
+        {/* Decorative Background Pattern */}
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-20 h-20 bg-black/10 rounded-full blur-xl"></div>
       </div>
 
       {/* Card Body */}
-      <div className="card-body">
-        <p className="unit-description">{unit.description}</p>
+      <div className="p-6 flex flex-col flex-grow bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+        <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6 flex-grow">
+          {unit.description}
+        </p>
         
-        <div className="progress-section">
-          <div className="progress-labels">
-            <span className="progress-text">{completedLessons}/{totalLessons} Lessons</span>
-            <span className="progress-percent">{percentComplete}%</span>
+        <div className="mt-auto space-y-2">
+          <div className="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <span>Progress</span>
+            <span>{percentComplete}%</span>
           </div>
-          <div className="progress-track">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${percentComplete}%` }}
-            ></div>
+          <div className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${percentComplete}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className={`h-full rounded-full ${isCompleted ? 'bg-gradient-success' : 'bg-gradient-primary'}`}
+            />
+          </div>
+          <div className="text-right text-xs text-slate-400 font-medium">
+            {completedLessons}/{totalLessons} Lessons
           </div>
         </div>
       </div>
 
-      {/* Hover Overlay / Action */}
+      {/* Hover Action Overlay */}
       {!isLocked && (
-        <div className="action-overlay">
-          <button className="play-btn">
-            <Play size={24} fill="currentColor" className="ml-1" />
-          </button>
+        <div className="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+          <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-300">
+            <Play size={24} className="text-primary ml-1" fill="currentColor" />
+          </div>
         </div>
       )}
 
       {/* Locked Overlay */}
       {isLocked && (
-        <div className="locked-overlay">
-          <div className="lock-icon-box">
-            <Lock size={24} />
+        <div className="absolute inset-0 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center z-20">
+          <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full shadow-sm flex items-center justify-center text-slate-400">
+            <Lock size={20} />
           </div>
         </div>
       )}
-
-      <style>{`
-        .unit-card {
-          background: var(--bg-card);
-          border-radius: var(--radius-xl);
-          box-shadow: var(--shadow-sm);
-          position: relative;
-          overflow: hidden;
-          transition: all var(--transition-base);
-          cursor: pointer;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          border: 1px solid rgba(0,0,0,0.08); /* Stronger border */
-        }
-
-        .unit-card.unlocked:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-lg);
-          border-color: var(--text-primary); /* Highlight border on hover */
-        }
-
-        .unit-card.locked {
-          opacity: 0.6;
-          cursor: not-allowed;
-          background: var(--bg-secondary);
-          filter: grayscale(1);
-        }
-
-        .card-header {
-          background: var(--gradient-primary);
-          padding: var(--spacing-lg);
-          color: white;
-          position: relative;
-        }
-
-        .unit-card.completed .card-header {
-          background: var(--gradient-success);
-        }
-
-        .header-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: var(--spacing-sm);
-        }
-
-        .unit-badge {
-          font-size: 0.75rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          background: white; /* Solid white for contrast */
-          color: #18181B; /* Always dark text on white background */
-          padding: 4px 10px;
-          border-radius: var(--radius-full);
-          box-shadow: var(--shadow-sm);
-        }
-
-        .completed-badge {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: white;
-          background: rgba(0,0,0,0.2); /* Darker overlay for text */
-          padding: 4px 10px;
-          border-radius: var(--radius-full);
-        }
-
-        .unit-title {
-          font-size: 1.5rem;
-          font-weight: 800;
-          line-height: 1.2;
-          color: white;
-          font-family: 'Outfit', sans-serif;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for legibility */
-        }
-
-        .card-body {
-          padding: var(--spacing-lg);
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-          background: var(--bg-card);
-        }
-
-        .unit-description {
-          font-size: 1rem;
-          color: var(--text-secondary); /* Darker grey */
-          margin-bottom: var(--spacing-lg);
-          line-height: 1.5;
-          flex-grow: 1;
-        }
-
-        .progress-section {
-          margin-top: auto;
-        }
-
-        .progress-labels {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.85rem;
-          font-weight: 700;
-          color: var(--text-primary); /* Black text */
-          margin-bottom: 8px;
-        }
-
-        .progress-track {
-          height: 10px; /* Thicker bar */
-          background: var(--bg-secondary);
-          border-radius: var(--radius-full);
-          overflow: hidden;
-          border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .progress-fill {
-          height: 100%;
-          background: var(--gradient-primary);
-          border-radius: var(--radius-full);
-          transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .unit-card.completed .progress-fill {
-          background: var(--gradient-success);
-        }
-
-        /* Action Overlay */
-        .action-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(255,255,255,0.1); /* Very subtle overlay */
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0;
-          transition: opacity 0.2s ease;
-        }
-
-        .unit-card:hover .action-overlay {
-          opacity: 1;
-        }
-
-        .play-btn {
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
-          background: white;
-          color: var(--text-primary);
-          border: 2px solid var(--bg-secondary);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: var(--shadow-lg);
-          transform: scale(0.9);
-          transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .unit-card:hover .play-btn {
-          transform: scale(1);
-        }
-
-        /* Locked Overlay */
-        .locked-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(240,240,240,0.5); /* Solid-ish overlay */
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .lock-icon-box {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: white;
-          color: var(--text-muted);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: var(--shadow-sm);
-        }
-      `}</style>
-    </div>
+    </motion.div>
   );
 }
-

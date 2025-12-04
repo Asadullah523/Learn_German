@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, Trophy, ArrowRight, RefreshCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Quiz({ data, onComplete }) {
   const navigate = useNavigate();
@@ -41,30 +42,40 @@ export default function Quiz({ data, onComplete }) {
     const percentage = Math.round((score / data.questions.length) * 100);
     
     return (
-      <div className="quiz-result animate-fade-in">
-        <div className="result-card">
-          <div className="trophy-icon">
-            <Trophy size={48} className="text-gold" />
-          </div>
-          <h2 className="text-3xl font-bold mb-2">Quiz Complete!</h2>
-          <p className="text-muted mb-8">You scored {percentage}%</p>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex justify-center p-4"
+      >
+        <div className="glass-panel p-8 md:p-12 text-center max-w-md w-full flex flex-col items-center">
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
+            transition={{ type: "spring", delay: 0.2 }}
+            className="w-24 h-24 bg-yellow-50 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mb-6 shadow-inner"
+          >
+            <Trophy size={48} className="text-yellow-500" />
+          </motion.div>
           
-          <div className="score-circle mb-8">
-            <span className="score-value">{score}</span>
-            <span className="score-total">/ {data.questions.length}</span>
+          <h2 className="font-heading font-black text-3xl text-slate-900 dark:text-white mb-2">Quiz Complete!</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium">You scored {percentage}%</p>
+          
+          <div className="flex items-baseline gap-2 mb-8">
+            <span className="text-6xl font-black text-primary">{score}</span>
+            <span className="text-2xl font-bold text-slate-300 dark:text-slate-600">/ {data.questions.length}</span>
           </div>
 
-          <p className="result-message mb-8">
-            {percentage === 100 ? "Perfekt! You mastered this unit." : 
-             percentage >= 70 ? "Great job! Keep it up." : 
-             "Good effort! Review the lessons and try again."}
+          <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-8 leading-relaxed">
+            {percentage === 100 ? "Perfekt! You mastered this unit. 🌟" : 
+             percentage >= 70 ? "Great job! Keep it up. 👍" : 
+             "Good effort! Review the lessons and try again. 💪"}
           </p>
           
-          <button onClick={() => navigate('/')} className="btn btn-primary w-full">
+          <button onClick={() => navigate('/')} className="btn btn-primary w-full py-4 text-lg shadow-xl">
             Back to Dashboard
           </button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -77,259 +88,113 @@ export default function Quiz({ data, onComplete }) {
     : 0;
 
   return (
-    <div className="quiz-container animate-slide-up">
+    <div className="max-w-2xl mx-auto p-4 md:p-0">
       {/* Header / Progress */}
-      <div className="quiz-header mb-8">
-        <div className="quiz-header-top">
-          <span className="quiz-question-count">
+      <div className="mb-8">
+        <div className="flex justify-between items-end mb-2">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
             Question {currentQuestionIndex + 1} of {data.questions.length}
           </span>
-          <span className="quiz-progress-text">
+          <span className="text-xs font-bold text-primary">
             {progressPercentage}%
           </span>
         </div>
-        <div className="progress-track">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${barWidth}%` }}
-          ></div>
+        <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${barWidth}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="h-full bg-gradient-primary rounded-full"
+          />
         </div>
       </div>
 
-      {/* Question */}
-      <div className="question-card mb-8">
-        <h3 className="text-2xl font-bold text-center">{currentQuestion.text}</h3>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentQuestionIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Question */}
+          <div className="glass-panel p-8 mb-8 min-h-[160px] flex items-center justify-center text-center">
+            <h3 className="font-heading font-bold text-2xl md:text-3xl text-slate-900 dark:text-white leading-tight">
+              {currentQuestion.text}
+            </h3>
+          </div>
 
-      {/* Options */}
-      <div className="options-grid">
-        {currentQuestion.options.map((option, index) => {
-          let className = "option-btn";
-          if (selectedOption === index) className += " selected";
-          if (isAnswered) {
-            if (index === currentQuestion.correct) className += " correct";
-            else if (index === selectedOption) className += " wrong";
-            else className += " dimmed";
-          }
+          {/* Options */}
+          <div className="grid gap-4">
+            {currentQuestion.options.map((option, index) => {
+              let buttonClass = "relative p-6 rounded-xl border-2 text-left font-bold text-lg transition-all duration-200 flex justify-between items-center group ";
+              
+              if (isAnswered) {
+                if (index === currentQuestion.correct) {
+                  buttonClass += "bg-green-50 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400";
+                } else if (index === selectedOption) {
+                  buttonClass += "bg-red-50 dark:bg-red-900/20 border-red-500 text-red-700 dark:text-red-400";
+                } else {
+                  buttonClass += "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-400 opacity-50";
+                }
+              } else {
+                if (selectedOption === index) {
+                  buttonClass += "bg-blue-50 dark:bg-blue-900/20 border-primary text-primary shadow-md transform scale-[1.01]";
+                } else {
+                  buttonClass += "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:shadow-sm hover:-translate-y-1";
+                }
+              }
 
-          return (
-            <button 
-              key={index} 
-              className={className}
-              onClick={() => handleOptionClick(index)}
-              disabled={isAnswered}
-            >
-              <span className="option-text">{option}</span>
-              {isAnswered && index === currentQuestion.correct && <Check size={24} className="text-success" />}
-              {isAnswered && index === selectedOption && index !== currentQuestion.correct && <X size={24} className="text-error" />}
-            </button>
-          );
-        })}
-      </div>
+              return (
+                <button 
+                  key={index} 
+                  className={buttonClass}
+                  onClick={() => handleOptionClick(index)}
+                  disabled={isAnswered}
+                >
+                  <span className="relative z-10">{option}</span>
+                  {isAnswered && index === currentQuestion.correct && (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                      <Check size={24} className="text-green-500" />
+                    </motion.div>
+                  )}
+                  {isAnswered && index === selectedOption && index !== currentQuestion.correct && (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                      <X size={24} className="text-red-500" />
+                    </motion.div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Footer Actions */}
-      <div className="quiz-footer mt-8">
+      <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
         {!isAnswered ? (
           <button 
-            className="btn btn-primary w-full btn-lg" 
+            className={`btn w-full py-4 text-lg shadow-lg transition-all ${selectedOption !== null ? 'btn-primary' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
             onClick={handleCheck}
             disabled={selectedOption === null}
           >
             Check Answer
           </button>
         ) : (
-          <button className="btn btn-primary w-full btn-lg" onClick={handleNext}>
+          <motion.button 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="btn btn-primary w-full py-4 text-lg shadow-lg flex items-center justify-center gap-2" 
+            onClick={handleNext}
+          >
             {currentQuestionIndex < data.questions.length - 1 ? (
-              <span className="flex items-center gap-2">Next Question <ArrowRight size={20} /></span>
+              <>Next Question <ArrowRight size={20} /></>
             ) : (
-              <span className="flex items-center gap-2">Finish Quiz <Trophy size={20} /></span>
+              <>Finish Quiz <Trophy size={20} /></>
             )}
-          </button>
+          </motion.button>
         )}
       </div>
-
-      <style>{`
-        .quiz-container {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: var(--spacing-lg);
-        }
-
-        .quiz-header-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          margin-bottom: 8px;
-        }
-
-        .quiz-question-count {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
-
-        .quiz-progress-text {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-
-        .progress-track {
-          height: 8px;
-          background: var(--bg-secondary);
-          border-radius: var(--radius-full);
-          overflow: hidden;
-        }
-
-        .progress-fill {
-          height: 100%;
-          background: var(--gradient-primary);
-          border-radius: var(--radius-full);
-          transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .question-card {
-          padding: var(--spacing-xl);
-          background: var(--bg-card);
-          border-radius: var(--radius-xl);
-          box-shadow: var(--shadow-sm);
-          border: 1px solid rgba(0,0,0,0.05);
-          min-height: 160px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .options-grid {
-          display: grid;
-          gap: var(--spacing-md);
-        }
-
-        .option-btn {
-          padding: var(--spacing-lg);
-          border: 2px solid var(--bg-secondary);
-          border-radius: var(--radius-lg);
-          background: var(--bg-card);
-          text-align: left;
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--text-primary);
-          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          cursor: pointer;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .option-btn:hover:not(:disabled) {
-          transform: translateY(-4px) scale(1.01);
-          border-color: var(--text-primary);
-          box-shadow: var(--shadow-md);
-        }
-
-        .option-btn:active:not(:disabled) {
-          transform: scale(0.98);
-        }
-
-        .option-btn.selected {
-          border-color: #6366F1; /* Indigo */
-          background: #EEF2FF;
-          color: #4338CA;
-        }
-
-        .option-btn.correct {
-          border-color: #10B981; /* Emerald */
-          background: #ECFDF5;
-          color: #065F46;
-        }
-
-        .option-btn.wrong {
-          border-color: #EF4444; /* Red */
-          background: #FEF2F2;
-          color: #991B1B;
-        }
-        
-        .option-btn.dimmed {
-          opacity: 0.5;
-        }
-
-        .text-success { color: #10B981; }
-        .text-error { color: #EF4444; }
-        .text-gold { color: #F59E0B; }
-
-        /* Result Card */
-        .quiz-result {
-          display: flex;
-          justify-content: center;
-          padding: var(--spacing-xl);
-        }
-
-        .result-card {
-          background: var(--bg-card);
-          padding: var(--spacing-2xl);
-          border-radius: var(--radius-2xl);
-          box-shadow: var(--shadow-lg);
-          text-align: center;
-          max-width: 400px;
-          width: 100%;
-          border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .trophy-icon {
-          width: 80px;
-          height: 80px;
-          background: #FFFBEB;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto var(--spacing-lg);
-        }
-
-        .score-circle {
-          display: inline-flex;
-          align-items: baseline;
-          gap: 4px;
-        }
-
-        .score-value {
-          font-size: 4rem;
-          font-weight: 800;
-          color: var(--text-primary);
-          line-height: 1;
-        }
-
-        .score-total {
-          font-size: 1.5rem;
-          color: var(--text-muted);
-          font-weight: 600;
-        }
-
-        .btn-lg {
-          padding: 1rem 2rem;
-          font-size: 1.1rem;
-        }
-        
-        .w-full {
-          width: 100%;
-        }
-        
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .gap-2 { gap: 0.5rem; }
-        .justify-end { justify-content: flex-end; }
-        .justify-center { justify-content: center; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-8 { margin-bottom: 2rem; }
-        .mt-8 { margin-top: 2rem; }
-        .text-center { text-align: center; }
-        .text-2xl { font-size: 1.5rem; }
-        .font-bold { font-weight: 700; }
-      `}</style>
     </div>
   );
 }

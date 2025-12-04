@@ -1,7 +1,9 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { BookOpen, Trophy, Home, Settings as SettingsIcon,  Menu, X } from 'lucide-react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, Trophy, Home, Settings as SettingsIcon, Menu, X } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
+import ThemeToggle from './ThemeToggle';
 
 const Sidebar = ({ isOpen, toggle }) => {
   const { progress } = useProgress();
@@ -12,61 +14,80 @@ const Sidebar = ({ isOpen, toggle }) => {
     }
   };
 
+  const navItems = [
+    { to: "/", icon: Home, label: "Dashboard" },
+    { to: "/learn", icon: BookOpen, label: "Learn" },
+    { to: "/achievements", icon: Trophy, label: "Achievements" },
+    { to: "/settings", icon: SettingsIcon, label: "Settings" },
+  ];
+
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
-      <div className="sidebar-header">
-        <div className="logo-container">
-          <span className="logo-icon">🇩🇪</span>
-          <h1 className="logo-text">DeutschLernen</h1>
+    <aside className={`fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="h-full glass-panel m-4 flex flex-col border-white/20 dark:border-white/10">
+        {/* Header */}
+        <div className="p-6 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl filter drop-shadow-md">🇩🇪</span>
+            <h1 className="font-heading font-bold text-xl bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              DeutschLernen
+            </h1>
+          </div>
+          <button className="md:hidden p-2 text-slate-500 hover:text-primary transition-colors" onClick={toggle}>
+            <X size={24} />
+          </button>
         </div>
-        <button className="close-menu-btn" onClick={toggle}>
-          <X size={24} />
-        </button>
-      </div>
 
-      <nav className="nav-menu">
-        <NavLink 
-          to="/" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={handleNavClick}
-        >
-          <Home size={20} />
-          <span>Dashboard</span>
-        </NavLink>
-        <NavLink 
-          to="/learn" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={handleNavClick}
-        >
-          <BookOpen size={20} />
-          <span>Learn</span>
-        </NavLink>
-        <NavLink 
-          to="/achievements" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={handleNavClick}
-        >
-          <Trophy size={20} />
-          <span>Achievements</span>
-        </NavLink>
-        <NavLink 
-          to="/settings" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          onClick={handleNavClick}
-        >
-          <SettingsIcon size={20} />
-          <span>Settings</span>
-        </NavLink>
-      </nav>
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={handleNavClick}
+              className={({ isActive }) => `
+                relative flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group
+                ${isActive 
+                  ? 'text-white shadow-lg shadow-blue-500/25' 
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50'
+                }
+              `}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className="absolute inset-0 bg-gradient-primary rounded-xl -z-10"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <item.icon size={20} className={isActive ? 'text-white' : 'group-hover:text-primary transition-colors'} />
+                  <span className="font-medium">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
 
-      <div className="user-stats">
-        <div className="stat-item">
-          <span className="stat-label">XP</span>
-          <span className="stat-value">{progress.xp}</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Level</span>
-          <span className="stat-value">{progress.level}</span>
+        {/* Footer Stats */}
+        <div className="p-4 mt-auto">
+          <div className="bg-white/50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Your Progress</span>
+              <ThemeToggle />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1 text-center p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
+                <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-1">XP</div>
+                <div className="font-heading font-bold text-xl text-slate-800 dark:text-slate-200">{progress.xp}</div>
+              </div>
+              <div className="flex-1 text-center p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30">
+                <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-1">LEVEL</div>
+                <div className="font-heading font-bold text-xl text-slate-800 dark:text-slate-200">{progress.level}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
@@ -75,291 +96,59 @@ const Sidebar = ({ isOpen, toggle }) => {
 
 export default function Layout() {
   const [isSidebarOpen, setSidebarOpen] = React.useState(false);
+  const location = useLocation();
 
   return (
-    <div className="app-layout">
-      {/* Backdrop for mobile */}
-      <div 
-        className={`backdrop ${isSidebarOpen ? 'visible' : ''}`} 
-        onClick={() => setSidebarOpen(false)}
-      />
+    <div className="min-h-screen bg-background text-text-primary transition-colors duration-300 overflow-hidden">
+      {/* Animated Background Blobs */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob opacity-70"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-purple-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 opacity-70"></div>
+        <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 dark:bg-pink-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 opacity-70"></div>
+      </div>
 
-      <Sidebar isOpen={isSidebarOpen} toggle={() => setSidebarOpen(!isSidebarOpen)} />
-      
-      {/* Mobile Header - Moved outside main content */}
-      <header className="mobile-header">
-        <button onClick={() => setSidebarOpen(true)} className="menu-btn">
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 px-4 py-3 glass-panel rounded-none border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🇩🇪</span>
+          <span className="font-heading font-bold text-lg text-slate-800 dark:text-white">DeutschLernen</span>
+        </div>
+        <button onClick={() => setSidebarOpen(true)} className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
           <Menu size={24} />
         </button>
-        <span className="mobile-logo">DeutschLernen</span>
       </header>
 
-      <main className="main-content">
-        <div className="content-container">
-          <Outlet />
+      {/* Backdrop */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <Sidebar isOpen={isSidebarOpen} toggle={() => setSidebarOpen(false)} />
+
+      {/* Main Content */}
+      <main className="relative z-10 md:ml-80 min-h-screen p-4 md:p-8 pt-20 md:pt-8 transition-all duration-300">
+        <div className="max-w-7xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
-
-      <style>{`
-        .app-layout {
-          display: flex;
-          min-height: 100vh;
-        }
-
-        .backdrop {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.2);
-          backdrop-filter: blur(4px);
-          -webkit-backdrop-filter: blur(4px);
-          z-index: 90;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity var(--transition-base);
-        }
-
-        .backdrop.visible {
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        /* Book Spine Sidebar */
-        .sidebar {
-          width: 260px;
-          background: var(--bg-paper);
-          border-right: 2px solid rgba(139, 115, 85, 0.2);
-          padding: var(--spacing-lg);
-          display: flex;
-          flex-direction: column;
-          position: fixed;
-          height: 100vh;
-          transition: transform var(--transition-base);
-          z-index: 100;
-          box-shadow: var(--shadow-page);
-        }
-
-        .sidebar::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 3px;
-          height: 100%;
-          background: var(--gradient-gold);
-          opacity: 0.4;
-        }
-
-        .sidebar-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: var(--spacing-xl);
-          padding-bottom: var(--spacing-md);
-          border-bottom: 1px solid rgba(139, 115, 85, 0.15);
-        }
-
-        .logo-container {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-sm);
-        }
-
-        .close-menu-btn {
-          display: none;
-          padding: var(--spacing-xs);
-          color: var(--text-muted);
-          border-radius: var(--radius-sm);
-          transition: all var(--transition-base);
-        }
-
-        .close-menu-btn:hover {
-          background: rgba(212, 165, 116, 0.1);
-          color: var(--accent-gold);
-        }
-
-        .logo-text {
-          font-weight: 700;
-          font-size: 1.35rem;
-          color: var(--text-primary);
-          font-family: 'Crimson Text', serif;
-          letter-spacing: -0.01em;
-        }
-
-        .logo-icon {
-          font-size: 1.75rem;
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        .nav-menu {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-xs);
-          flex: 1;
-        }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-md);
-          padding: var(--spacing-md);
-          border-radius: var(--radius-md);
-          color: var(--text-muted);
-          font-weight: 600;
-          font-size: 0.95rem;
-          transition: all var(--transition-base);
-          position: relative;
-        }
-
-        .nav-item:hover {
-          background: rgba(212, 165, 116, 0.1);
-          color: var(--accent-gold);
-          transform: translateX(4px);
-        }
-
-        .nav-item.active {
-          background: var(--gradient-gold);
-          color: white;
-          box-shadow: var(--shadow-page);
-        }
-
-        .nav-item.active:hover {
-          transform: translateX(0);
-        }
-
-        /* User Stats */
-        .user-stats {
-          margin-top: var(--spacing-md);
-          padding-top: var(--spacing-md);
-          border-top: 1px solid rgba(139, 115, 85, 0.15);
-          display: flex;
-          gap: var(--spacing-md);
-          justify-content: space-around;
-        }
-
-        .stat-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: var(--spacing-sm);
-          background: rgba(212, 165, 116, 0.08);
-          border-radius: var(--radius-md);
-          border: 1px solid rgba(212, 165, 116, 0.15);
-          flex: 1;
-          transition: all var(--transition-base);
-        }
-
-        .stat-item:hover {
-          transform: translateY(-2px);
-          box-shadow: var(--shadow-page);
-          border-color: var(--accent-gold);
-        }
-
-        .stat-label {
-          font-size: 0.7rem;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          font-weight: 600;
-          margin-bottom: 2px;
-        }
-
-        .stat-value {
-          font-weight: 800;
-          font-size: 1.25rem;
-          color: var(--accent-gold);
-          font-family: 'Crimson Text', serif;
-          line-height: 1;
-        }
-
-        .main-content {
-          flex: 1;
-          margin-left: 260px;
-          min-height: 100vh;
-        }
-
-        .content-container {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        /* Mobile Header */
-        .mobile-header {
-          display: none;
-          align-items: center;
-          gap: var(--spacing-md);
-          padding: var(--spacing-md);
-          background: var(--bg-paper);
-          border-bottom: 2px solid rgba(139, 115, 85, 0.2);
-          box-shadow: var(--shadow-page);
-          position: relative;
-        }
-
-        .mobile-header::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          background: var(--gradient-gold);
-          opacity: 0.6;
-        }
-
-        .menu-btn {
-          padding: var(--spacing-sm);
-          color: var(--accent-gold);
-          border-radius: var(--radius-sm);
-          transition: all var(--transition-base);
-        }
-
-        .menu-btn:hover {
-          background: rgba(212, 165, 116, 0.15);
-        }
-
-        .mobile-logo {
-          font-weight: 700;
-          font-size: 1.25rem;
-          color: var(--text-primary);
-          font-family: 'Crimson Text', serif;
-        }
-
-        @media (max-width: 768px) {
-          .sidebar {
-            transform: translateX(-100%);
-          }
-          
-          .sidebar.open {
-            transform: translateX(0);
-            box-shadow: var(--shadow-book);
-          }
-
-          .close-menu-btn {
-            display: block;
-          }
-
-          .main-content {
-            margin-left: 0;
-            padding-top: 70px;
-          }
-
-          .mobile-header {
-            display: flex;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 80;
-            width: 100%;
-            box-sizing: border-box;
-          }
-
-          .user-stats {
-            flex-direction: row;
-          }
-        }
-      `}</style>
     </div>
   );
 }

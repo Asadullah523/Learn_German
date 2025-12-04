@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Quote } from 'lucide-react';
 
 const quotes = [
   {
@@ -43,68 +44,23 @@ export default function MotivationalQuote() {
   }, []);
 
   return (
-    <div className="quote-card">
-      <div className="quote-icon">💭</div>
-      <div className="quote-content">
-        <p className="quote-text">"{quote.text}"</p>
-        <p className="quote-author">— {quote.author}</p>
+    <div className="glass-panel p-8 h-full flex flex-col justify-center relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
+        <Quote size={80} />
       </div>
-
-      <style>{`
-        .quote-card {
-          background: linear-gradient(135deg, rgba(139, 157, 124, 0.08), rgba(139, 157, 124, 0.03));
-          border-radius: var(--radius-lg);
-          padding: var(--spacing-sm) var(--spacing-md);
-          border: 1px solid rgba(139, 157, 124, 0.2);
-          box-shadow: var(--shadow-page);
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          height: 100%;
-        }
-
-        .quote-card::before {
-          content: '"';
-          position: absolute;
-          top: -15px;
-          left: 10px;
-          font-size: 80px;
-          font-family: Georgia, serif;
-          color: rgba(139, 157, 124, 0.1);
-          line-height: 1;
-          pointer-events: none;
-        }
-
-        .quote-icon {
-          font-size: 1.25rem;
-          margin-bottom: var(--spacing-xs);
-          position: relative;
-          z-index: 1;
-        }
-
-        .quote-content {
-          position: relative;
-          z-index: 1;
-        }
-
-        .quote-text {
-          font-size: 0.95rem;
-          font-style: italic;
-          line-height: 1.5;
-          color: var(--text-secondary);
-          margin-bottom: var(--spacing-xs);
-          font-family: 'Crimson Text', Georgia, serif;
-        }
-
-        .quote-author {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          font-weight: 600;
-          text-align: right;
-        }
-      `}</style>
+      
+      <div className="relative z-10">
+        <Quote size={24} className="text-primary mb-4 opacity-50" />
+        <p className="font-heading font-medium text-lg md:text-xl text-slate-700 dark:text-slate-200 italic leading-relaxed mb-6">
+          "{quote.text}"
+        </p>
+        <div className="flex items-center gap-3">
+          <div className="h-px w-8 bg-primary/50"></div>
+          <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {quote.author}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import Confetti from 'react-confetti';
 import { useProgress } from '../context/ProgressContext';
 import Quiz from '../components/Quiz';
 import { ArrowLeft, CheckCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -92,41 +94,28 @@ export default function LessonView() {
   };
 
   useEffect(() => {
-    console.log("LessonView params:", { unitId, lessonId });
     const unit = curriculum.units.find(u => u.id === unitId);
     if (unit) {
       const foundLesson = unit.lessons.find(l => l.id === lessonId);
-      console.log("Found lesson:", foundLesson);
       setLesson(foundLesson);
-      // Check if lesson is already completed
       setIsCompleted(isLessonCompleted(lessonId));
-      // Track this as the last lesson viewed
       if (setLastLesson) {
         setLastLesson(unitId, lessonId);
       }
-    } else {
-      console.error("Unit not found:", unitId);
     }
   }, [unitId, lessonId, isLessonCompleted, setLastLesson]);
 
   const handleComplete = () => {
     completeLesson(lesson.id, lesson.xp);
-    setIsCompleted(true); // Immediately update local state
+    setIsCompleted(true); 
     
-    // For quizzes, the Quiz component handles the result view and navigation.
-    // We only want to show the overlay for regular text lessons.
     if (lesson.type !== 'quiz') {
       setShowCompletion(true);
-      // Hide overlay after delay without navigating
       setTimeout(() => {
         setShowCompletion(false);
       }, 2000);
     }
   };
-
-  // ... (rest of component)
-
-
 
   const handleNext = () => {
     const next = getNextLesson();
@@ -142,16 +131,11 @@ export default function LessonView() {
     }
   };
 
-
-
   if (!lesson) {
     return (
-      <div className="p-12 text-center">
-        <div className="text-xl text-muted mb-4">Loading lesson...</div>
-        <div className="text-sm text-muted opacity-75 mb-4">
-          Looking for: {unitId} / {lessonId}
-        </div>
-        <button onClick={() => navigate('/')} className="mt-4 btn btn-secondary">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+        <div className="text-xl text-slate-500 mb-4">Loading lesson...</div>
+        <button onClick={() => navigate('/')} className="btn btn-secondary">
           Back to Dashboard
         </button>
       </div>
@@ -160,99 +144,171 @@ export default function LessonView() {
 
   if (lesson.type === 'quiz') {
     return (
-      <div className="lesson-view container py-8">
+      <motion.div 
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="max-w-3xl mx-auto py-8 px-4"
+      >
         <button onClick={() => navigate('/')} className="btn btn-secondary mb-6">
           <ArrowLeft size={20} className="mr-2" /> Back
         </button>
         <Quiz data={lesson} onComplete={handleComplete} />
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="lesson-view container animate-fade-in">
-      <header className="lesson-header mb-8">
-        <button onClick={() => navigate('/')} className="back-btn">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="max-w-3xl mx-auto pb-24 px-4 md:px-0"
+    >
+      {showCompletion && <Confetti recycle={false} numberOfPieces={500} />}
+      
+      <header className="flex items-center gap-6 mb-8">
+        <motion.button 
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => navigate('/')} 
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shadow-sm"
+        >
           <ArrowLeft size={24} />
-        </button>
-        <div className="header-content">
-          <span className="text-sm text-muted uppercase tracking-wider">Lesson</span>
-          <h1 className="text-3xl font-bold">{lesson.title}</h1>
+        </motion.button>
+        <div className="flex-1">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Lesson</span>
+          <motion.h1 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-3xl font-heading font-bold text-slate-900 dark:text-white"
+          >
+            {lesson.title}
+          </motion.h1>
         </div>
-        <div className="xp-pill">
+        <motion.div 
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
+          className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full font-bold text-sm"
+        >
           +{lesson.xp} XP
-        </div>
+        </motion.div>
       </header>
 
-      <div className="content-stack">
+      <div className="space-y-8">
         {lesson.content.map((block, index) => (
-          <div key={index} className="content-block card animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+          <motion.div 
+            key={index} 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ delay: index * 0.1 }}
+            className="glass-panel p-6 md:p-8"
+          >
             {block.type === 'text' && (
-              <p className="text-lg leading-relaxed">{block.value}</p>
+              <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300">{block.value}</p>
             )}
 
             {block.type === 'vocabulary' && (
-              <div className="vocab-list">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {block.items.map((item, i) => (
-                  <div key={i} className="vocab-item">
-                    <div className="vocab-main">
-                      <div className="vocab-de">{item.de}</div>
-                      {item.pronunciation && (
-                        <div className="vocab-pronunciation">/{item.pronunciation}/</div>
-                      )}
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ scale: 1.02, backgroundColor: "rgba(0,0,0,0.02)" }}
+                    className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-heading font-bold text-lg text-primary">{item.de}</div>
+                        {item.pronunciation && (
+                          <div className="text-sm font-mono text-slate-400">/{item.pronunciation}/</div>
+                        )}
+                      </div>
+                      <div className="text-right font-medium text-slate-600 dark:text-slate-400">{item.en}</div>
                     </div>
-                    <div className="vocab-en">{item.en}</div>
-                    {item.context && <div className="vocab-ctx" dangerouslySetInnerHTML={{ __html: formatTextWithBold(item.context) }} />}
-                  </div>
+                    {item.context && (
+                      <div 
+                        className="text-sm text-slate-500 mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"
+                        dangerouslySetInnerHTML={{ __html: formatTextWithBold(item.context) }} 
+                      />
+                    )}
+                  </motion.div>
                 ))}
               </div>
             )}
 
             {block.type === 'sentences' && (
-              <div className="sentence-list">
-                <h4 className="font-bold mb-4 text-lg">Practice Sentences</h4>
+              <div className="space-y-4">
+                <h4 className="font-heading font-bold text-lg text-slate-900 dark:text-white mb-4">Practice Sentences</h4>
                 {block.items.map((item, i) => (
-                  <div key={i} className="sentence-item mb-4 p-3 bg-surface rounded-lg border border-border">
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ x: 5 }}
+                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700"
+                  >
                     <div className="text-lg font-medium text-primary mb-1">{item.de}</div>
                     {item.pronunciation && (
-                      <div className="text-sm text-accent mb-1 font-mono">/{item.pronunciation}/</div>
+                      <div className="text-sm text-rose-500 font-mono mb-1">/{item.pronunciation}/</div>
                     )}
-                    <div className="text-muted italic">{item.en}</div>
-                  </div>
+                    <div className="text-slate-500 italic">{item.en}</div>
+                  </motion.div>
                 ))}
               </div>
             )}
 
             {block.type === 'dialogue' && (
-              <div className="dialogue-container">
+              <div className="space-y-6">
                 {block.lines.map((line, i) => (
-                  <div key={i} className={`dialogue-line ${line.speaker === 'You' ? 'dialogue-right' : 'dialogue-left'}`}>
-                    <div className="dialogue-bubble">
-                      <div className="dialogue-speaker">{line.speaker}</div>
-                      <div className="dialogue-text-de">{line.de}</div>
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, x: line.speaker === 'You' ? 20 : -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`flex flex-col ${line.speaker === 'You' ? 'items-end' : 'items-start'}`}
+                  >
+                    <div className={`
+                      max-w-[85%] p-4 rounded-2xl relative shadow-sm
+                      ${line.speaker === 'You' 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 rounded-br-none border border-blue-100 dark:border-blue-800/30' 
+                        : 'bg-white dark:bg-slate-800 rounded-bl-none border border-slate-200 dark:border-slate-700'
+                      }
+                    `}>
+                      <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">{line.speaker}</div>
+                      <div className="text-lg font-medium text-slate-800 dark:text-slate-200 mb-1">{line.de}</div>
                       {line.pronunciation && (
-                        <div className="dialogue-pronunciation">/{line.pronunciation}/</div>
+                        <div className="text-xs font-mono text-slate-400 mb-2">/{line.pronunciation}/</div>
                       )}
-                      <div className="dialogue-text-en">{line.en}</div>
+                      <div className="text-sm text-slate-500 italic pt-2 border-t border-slate-200/50 dark:border-slate-700/50">{line.en}</div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
 
             {block.type === 'table' && (
-              <div className="table-container">
-                <table className="lesson-table">
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr>
-                      {block.headers.map((h, i) => <th key={i} dangerouslySetInnerHTML={{ __html: formatTextWithBold(h) }} />)}
+                    <tr className="bg-slate-50 dark:bg-slate-800/50">
+                      {block.headers.map((h, i) => (
+                        <th key={i} className="p-4 font-bold text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700 whitespace-nowrap" dangerouslySetInnerHTML={{ __html: formatTextWithBold(h) }} />
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {block.rows.map((row, i) => (
-                      <tr key={i}>
-                        {row.map((cell, j) => <td key={j} dangerouslySetInnerHTML={{ __html: formatTextWithBold(cell) }} />)}
-                      </tr>
+                      <motion.tr 
+                        key={i}
+                        whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
+                        className="border-b border-slate-100 dark:border-slate-800 last:border-0"
+                      >
+                        {row.map((cell, j) => (
+                          <td key={j} className="p-4 text-slate-600 dark:text-slate-400" dangerouslySetInnerHTML={{ __html: formatTextWithBold(cell) }} />
+                        ))}
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -260,284 +316,113 @@ export default function LessonView() {
             )}
 
             {block.type === 'info' && (
-              <div className="info-box">
-                <h4 className="font-bold mb-2">{block.title}</h4>
-                <p dangerouslySetInnerHTML={{ __html: formatTextWithBold(block.value) }} />
+              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-xl p-4">
+                <h4 className="font-bold text-amber-800 dark:text-amber-500 mb-2 flex items-center gap-2">
+                  <span>💡</span> {block.title}
+                </h4>
+                <p className="text-amber-900/80 dark:text-amber-200/80" dangerouslySetInnerHTML={{ __html: formatTextWithBold(block.value) }} />
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
 
         {lesson.recap && (
-          <div className="recap-section card animate-slide-up" style={{ animationDelay: '0.5s' }}>
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <span className="text-accent">✨</span> Chapter Recap
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="glass-panel p-8 border-t-4 border-t-rose-500"
+          >
+            <h2 className="text-2xl font-heading font-bold mb-6 flex items-center gap-2 text-slate-900 dark:text-white">
+              <span className="text-rose-500">✨</span> Chapter Recap
             </h2>
             
-            <div className="recap-grid">
-              <div className="recap-column">
-                <h3 className="font-bold text-primary mb-4">Important Words</h3>
-                <ul className="recap-list">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="font-bold text-primary mb-4 uppercase tracking-wider text-sm">Important Words</h3>
+                <ul className="space-y-3">
                   {lesson.recap.vocabulary.map((item, i) => (
-                    <li key={i}>
-                      <span className="font-bold">{item.de}</span>
-                      <span className="text-muted text-sm"> - {item.en}</span>
+                    <li key={i} className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2 last:border-0">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{item.de}</span>
+                      <span className="text-slate-400 text-sm">{item.en}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="recap-column">
-                <h3 className="font-bold text-secondary mb-4">Daily Life Sentences</h3>
-                <ul className="recap-list">
+              <div>
+                <h3 className="font-bold text-rose-500 mb-4 uppercase tracking-wider text-sm">Daily Life Sentences</h3>
+                <ul className="space-y-4">
                   {lesson.recap.sentences.map((item, i) => (
-                    <li key={i} className="mb-2">
-                      <div className="font-medium">{item.de}</div>
-                      <div className="text-muted text-sm italic">{item.en}</div>
+                    <li key={i} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                      <div className="font-medium text-slate-800 dark:text-slate-200">{item.de}</div>
+                      <div className="text-slate-500 text-sm italic">{item.en}</div>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
-      <div className="lesson-footer mt-12 flex flex-col items-center gap-6">
-        <button 
-          className={`btn btn-lg w-full md:w-auto ${isCompleted ? 'btn-success' : 'btn-primary'}`} 
+      <div className="mt-12 flex flex-col items-center gap-6">
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={`btn btn-lg w-full md:w-auto px-8 py-4 text-lg shadow-xl ${isCompleted ? 'btn-success' : 'btn-primary'}`} 
           onClick={handleComplete}
           disabled={isCompleted}
         >
           <CheckCircle size={24} className="mr-2" />
           {isCompleted ? 'Chapter Completed' : 'Complete Chapter'}
-        </button>
+        </motion.button>
 
         <div className="flex justify-between w-full max-w-md mt-4">
-          <button 
+          <motion.button 
+            whileHover={{ x: -5 }}
             className={`btn btn-secondary ${!getPreviousLesson() ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={handlePrevious}
             disabled={!getPreviousLesson()}
           >
             <ChevronLeft size={20} className="mr-2" />
             Previous
-          </button>
+          </motion.button>
 
-          <button 
+          <motion.button 
+            whileHover={{ x: 5 }}
             className={`btn btn-secondary ${!getNextLesson() ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={handleNext}
             disabled={!getNextLesson()}
           >
             Next
             <ChevronRight size={20} className="ml-2" />
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {showCompletion && (
-        <div className="completion-overlay">
-          <div className="completion-content">
-            <span className="completion-icon">🎉</span>
-            <h2 className="text-3xl font-bold mb-2">Lesson Completed!</h2>
-            <p className="text-xl text-muted">+{lesson.xp} XP Earned</p>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        .lesson-view {
-          max-width: 800px;
-          margin: 0 auto;
-          padding-bottom: 4rem;
-          width: 100%;
-          box-sizing: border-box;
-        }
-
-        @media (max-width: 768px) {
-          .lesson-view {
-            max-width: 100%;
-            padding: 0;
-            padding-bottom: 2rem;
-          }
-        }
-
-        .recap-section {
-          border-top: 4px solid var(--accent);
-          background: linear-gradient(to bottom, var(--surface), var(--background));
-        }
-
-        .recap-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: var(--spacing-xl);
-        }
-
-        @media (max-width: 640px) {
-          .recap-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .recap-list {
-          list-style: none;
-          padding: 0;
-        }
-
-        .recap-list li {
-          margin-bottom: var(--spacing-sm);
-          padding-bottom: var(--spacing-sm);
-          border-bottom: 1px dashed var(--border);
-        }
-
-        .recap-list li:last-child {
-          border-bottom: none;
-        }
-
-        .lesson-header {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-lg);
-        }
-
-        .back-btn {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg-paper);
-          border: 1px solid var(--border-book);
-          color: var(--text-secondary);
-          transition: all 0.2s;
-          box-shadow: var(--shadow-page);
-        }
-
-        .back-btn:hover {
-          transform: translateX(-2px);
-          color: var(--text-primary);
-          border-color: var(--accent-gold);
-        }
-
-        .dialogue-bubble {
-          max-width: 80%;
-          padding: var(--spacing-lg);
-          border-radius: var(--radius-xl);
-          background: var(--bg-paper);
-          border: 2px solid var(--border-book);
-          position: relative;
-          box-shadow: var(--shadow-page);
-        }
-
-        /* Cloud/Speech Bubble Tail */
-        .dialogue-left .dialogue-bubble {
-          border-bottom-left-radius: 4px;
-        }
-
-        .dialogue-right .dialogue-bubble {
-          border-bottom-right-radius: 4px;
-          background: var(--bg-secondary);
-        }
-
-        .dialogue-left .dialogue-bubble::before {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: -10px;
-          width: 20px;
-          height: 20px;
-          background: var(--bg-paper);
-          border-bottom: 2px solid var(--border-book);
-          border-left: 2px solid var(--border-book);
-          border-radius: 0 0 0 100%;
-          z-index: 1;
-        }
-
-        .dialogue-right .dialogue-bubble::before {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          right: -10px;
-          width: 20px;
-          height: 20px;
-          background: var(--bg-secondary);
-          border-bottom: 2px solid var(--border-book);
-          border-right: 2px solid var(--border-book);
-          border-radius: 0 0 100% 0;
-          z-index: 1;
-        }
-
-        /* Completion Animation Overlay */
-        .completion-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(255, 255, 255, 0.9);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          animation: fadeIn 0.3s ease-out;
-        }
-
-        .completion-content {
-          text-align: center;
-          animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .completion-icon {
-          font-size: 5rem;
-          color: var(--accent-sage);
-          margin-bottom: var(--spacing-md);
-          display: block;
-        }
-
-        @keyframes scaleUp {
-          from { transform: scale(0.5); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-
-        /* Table Styles */
-        .table-container {
-          overflow-x: auto;
-          margin-bottom: var(--spacing-lg);
-          border-radius: var(--radius-md);
-          border: 1px solid var(--border-book);
-          background: var(--bg-paper);
-        }
-
-        .lesson-table {
-          width: 100%;
-          border-collapse: collapse;
-          min-width: 500px; /* Ensure it doesn't squish too much */
-        }
-
-        .lesson-table th,
-        .lesson-table td {
-          padding: 12px 16px;
-          text-align: left;
-          border-bottom: 1px solid var(--border-book);
-          vertical-align: top;
-        }
-
-        .lesson-table th {
-          background: var(--bg-secondary);
-          font-weight: 700;
-          color: var(--text-primary);
-          white-space: nowrap;
-        }
-
-        .lesson-table tr:last-child td {
-          border-bottom: none;
-        }
-
-        .lesson-table tr:hover td {
-          background: rgba(0, 0, 0, 0.02);
-        }
-      `}</style>
-    </div>
+      <AnimatePresence>
+        {showCompletion && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="text-center"
+            >
+              <div className="text-8xl mb-4 animate-bounce">🎉</div>
+              <h2 className="text-4xl font-heading font-black text-slate-900 dark:text-white mb-2">Lesson Completed!</h2>
+              <p className="text-2xl text-slate-500 dark:text-slate-400">+{lesson.xp} XP Earned</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

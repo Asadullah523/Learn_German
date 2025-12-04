@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Play, CheckCircle, Lock, BookOpen, MessageCircle, PenTool, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function LessonCard({ lesson, unitId, isCompleted, isLocked }) {
   
@@ -12,162 +13,71 @@ export default function LessonCard({ lesson, unitId, isCompleted, isLocked }) {
     }
   };
 
+  if (isLocked) {
+    return (
+      <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 opacity-60 cursor-not-allowed">
+        <div className="w-12 h-12 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+          <Lock size={20} />
+        </div>
+        <div className="flex-1">
+          <h4 className="font-heading font-semibold text-slate-500 dark:text-slate-400">{lesson.title}</h4>
+          <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">
+            <span>{lesson.type}</span>
+            <span>+{lesson.xp} XP</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Link 
-      to={!isLocked ? `/learn/${unitId}/${lesson.id}` : '#'}
-      className={`lesson-card-link ${isLocked ? 'pointer-events-none' : ''}`}
-    >
-      <div className={`lesson-card ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`}>
-        <div className="lesson-icon-box">
-          {isCompleted ? <CheckCircle size={24} /> : (isLocked ? <Lock size={24} /> : getIcon(lesson.type))}
+    <Link to={`/learn/${unitId}/${lesson.id}`} className="block group">
+      <motion.div 
+        whileHover={{ x: 4, backgroundColor: "rgba(255,255,255,0.8)" }}
+        className={`
+          flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
+          ${isCompleted 
+            ? 'bg-green-50/50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30' 
+            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/30 hover:shadow-md'
+          }
+        `}
+      >
+        <div className={`
+          w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-200
+          ${isCompleted 
+            ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
+            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40'
+          }
+        `}>
+          {isCompleted ? <CheckCircle size={20} /> : getIcon(lesson.type)}
         </div>
         
-        <div className="lesson-info">
-          <h4 className="lesson-title">{lesson.title}</h4>
-          <div className="lesson-meta">
-            <span className="lesson-type">{lesson.type}</span>
-            <span className="lesson-xp">+{lesson.xp} XP</span>
+        <div className="flex-1">
+          <h4 className={`font-heading font-semibold ${isCompleted ? 'text-green-900 dark:text-green-100' : 'text-slate-900 dark:text-slate-100'}`}>
+            {lesson.title}
+          </h4>
+          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider mt-1">
+            <span className={isCompleted ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}>
+              {lesson.type}
+            </span>
+            <span className={isCompleted ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}>
+              +{lesson.xp} XP
+            </span>
           </div>
         </div>
 
-        <div className="lesson-action">
-          {!isLocked && (
-            isCompleted ? 
-            <div className="status-badge completed">
-              <Star size={14} fill="currentColor" /> Done
-            </div> : 
-            <div className="status-badge start">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {isCompleted ? (
+             <span className="px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold flex items-center gap-1">
+               <Star size={12} fill="currentColor" /> Done
+             </span>
+          ) : (
+            <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold">
               Start
-            </div>
+            </span>
           )}
         </div>
-      </div>
-
-      <style>{`
-        .lesson-card-link {
-          text-decoration: none;
-          color: inherit;
-          display: block;
-        }
-
-        .lesson-card {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-md);
-          padding: var(--spacing-md);
-          background: white;
-          border: 1px solid var(--bg-secondary);
-          border-radius: var(--radius-lg);
-          transition: all 0.2s ease;
-          position: relative;
-        }
-
-        .lesson-card:hover {
-          transform: translateX(4px);
-          background: var(--bg-primary);
-          border-color: var(--text-muted);
-          box-shadow: var(--shadow-sm);
-        }
-
-        .lesson-card.locked {
-          opacity: 0.6;
-          background: var(--bg-secondary);
-          border-color: transparent;
-        }
-
-        .lesson-icon-box {
-          width: 48px;
-          height: 48px;
-          border-radius: 14px;
-          background: var(--bg-secondary);
-          color: var(--text-secondary);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          transition: all 0.2s;
-        }
-
-        .lesson-card:hover .lesson-icon-box {
-          background: var(--gradient-primary);
-          color: white;
-        }
-
-        .lesson-card.completed .lesson-icon-box {
-          background: var(--gradient-success);
-          color: white;
-        }
-
-        .lesson-info {
-          flex-grow: 1;
-        }
-
-        .lesson-title {
-          font-family: 'Outfit', sans-serif;
-          font-size: 1.05rem;
-          font-weight: 700;
-          color: #18181B;
-          margin-bottom: 4px;
-        }
-
-        .lesson-card.locked .lesson-title {
-          color: var(--text-primary);
-        }
-
-        .lesson-meta {
-          display: flex;
-          gap: 12px;
-          font-size: 0.75rem;
-          font-size: 0.75rem;
-          color: #666666;
-          text-transform: uppercase;
-          text-transform: uppercase;
-          font-weight: 700;
-          letter-spacing: 0.05em;
-        }
-
-        .lesson-card.locked .lesson-meta {
-          color: var(--text-muted);
-        }
-
-        .lesson-xp {
-          color: #333333;
-        }
-
-        .lesson-card.locked .lesson-xp {
-          color: var(--text-secondary);
-        }
-
-        .lesson-action {
-          flex-shrink: 0;
-        }
-
-        .status-badge {
-          font-size: 0.75rem;
-          font-weight: 700;
-          padding: 6px 12px;
-          border-radius: var(--radius-full);
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .status-badge.start {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-        }
-
-        .lesson-card:hover .status-badge.start {
-          background: var(--text-primary);
-          color: white;
-        }
-
-        .status-badge.completed {
-          color: #10B981;
-          background: rgba(16, 185, 129, 0.1);
-        }
-      `}</style>
+      </motion.div>
     </Link>
   );
 }
-
