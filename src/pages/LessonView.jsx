@@ -370,16 +370,30 @@ export default function LessonView() {
       </div>
 
       <div className="mt-12 flex flex-col items-center gap-6">
-        <motion.button 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className={`btn btn-lg w-full md:w-auto px-8 py-4 text-lg shadow-xl ${isCompleted ? 'btn-success' : 'btn-primary'}`} 
-          onClick={handleComplete}
-          disabled={isCompleted}
-        >
-          <CheckCircle size={24} className="mr-2" />
-          {isCompleted ? 'Chapter Completed' : 'Complete Chapter'}
-        </motion.button>
+          <motion.button
+            onClick={handleComplete}
+            disabled={isCompleted}
+            whileHover={{ scale: isCompleted ? 1 : 1.02, y: isCompleted ? 0 : -2 }}
+            whileTap={{ scale: isCompleted ? 1 : 0.98 }}
+            className={`
+              w-full md:w-auto px-8 py-4 rounded-2xl font-heading font-bold text-lg shadow-2xl transition-all duration-300
+              ${isCompleted 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white cursor-default ring-4 ring-green-500/30' 
+                : 'bg-gradient-to-r from-primary to-blue-600 text-white hover:shadow-blue-500/30 hover:shadow-2xl active:scale-95'
+              }
+            `}
+          >
+            {isCompleted ? (
+              <div className="flex items-center justify-center gap-2">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Chapter Completed
+              </div>
+            ) : (
+              'Complete Chapter'
+            )}
+          </motion.button>
 
         <div className="flex justify-between w-full max-w-md mt-4">
           <motion.button 

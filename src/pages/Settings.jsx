@@ -34,19 +34,14 @@ export default function Settings() {
   };
 
   const SettingSection = ({ title, children }) => (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="glass-panel p-6 md:p-8 mb-8"
-    >
+    <div className="glass-panel p-6 md:p-8 mb-8">
       <h2 className="font-heading font-bold text-xl text-slate-900 dark:text-white mb-6 flex items-center gap-2">
         {title}
       </h2>
       <div className="space-y-4">
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 
   const SettingRow = ({ icon: Icon, label, description, action, danger = false }) => (
@@ -104,57 +99,198 @@ export default function Settings() {
         />
       </SettingSection>
 
-      {/* Theme Presets */}
-      <SettingSection title="Theme Presets">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {themeContext.availableThemes.map((preset) => {
+      {/* Theme Presets - Reorganized */}
+      <SettingSection title="🎨 Theme Gallery">
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+          Choose from our collection of beautiful themes with unique animations
+        </p>
+        
+        {/* Default Light Theme */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>☀️</span> Default Theme
+          </h3>
+          {(() => {
+            const preset = 'default';
             const isActive = themeContext.themePreset === preset;
             const presetData = themePresets[preset];
             const colors = presetData[themeContext.isDark ? 'dark' : 'light'];
             
             return (
               <motion.button
-                key={preset}
                 onClick={() => themeContext.changeThemePreset(preset)}
                 className={`
-                  relative p-4 rounded-xl border-2 transition-all duration-200
+                  w-full relative p-6 rounded-2xl border-2 transition-all duration-300 text-left overflow-hidden group
                   ${isActive 
-                    ? 'border-primary shadow-lg shadow-primary/20 scale-105'  
-                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                    ? 'border-primary shadow-2xl shadow-primary/30 scale-[1.02]'  
+                    : 'border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:shadow-xl'
                   }
                 `}
-                whileHover={{ scale: isActive ? 1.05 : 1.02 }}
+                whileHover={{ y: isActive ? 0 : -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="flex flex-col items-center gap-2">
-                  {/* Color Preview */}
-                  <div className="flex gap-1 mb-2">
-                    <div className="w-6 h-6 rounded-full" style={{ backgroundColor: colors.primary }}></div>
-                    <div className="w-6 h-6 rounded-full" style={{ backgroundColor: colors.secondary }}></div>
-                    <div className="w-6 h-6 rounded-full" style={{ backgroundColor: colors.accent }}></div>
+                <div 
+                  className="absolute inset-0 opacity-10 group-hover:opacity-15 transition-opacity"
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.accent} 100%)`
+                  }}
+                />
+                
+                <div className="relative z-10">
+                  <div className="flex gap-2 mb-4">
+                    {[colors.primary, colors.secondary, colors.accent].map((color, i) => (
+                      <div 
+                        key={i}
+                        className="w-10 h-10 rounded-full shadow-lg border-2 border-white dark:border-slate-800 transform group-hover:scale-110 transition-transform"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
                   </div>
                   
-                  {/* Theme Name */}
-                  <span className={`font-bold text-sm ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-300'}`}>
-                    {presetData.name}
-                  </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className={`font-heading font-bold text-lg ${isActive ? 'text-primary' : 'text-slate-900 dark:text-white'}`}>
+                      {presetData.name}
+                    </h3>
+                    {isActive && (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        className="w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+                      >
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </motion.div>
+                    )}
+                  </div>
                   
-                  {/* Active Indicator */}
-                  {isActive && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
-                    >
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </motion.div>
-                  )}
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: colors.primary }} />
+                    <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: colors.secondary }} />
+                    <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: colors.accent }} />
+                  </div>
                 </div>
+                
+                {isActive && (
+                  <div 
+                    className="absolute inset-0 rounded-2xl opacity-20 blur-xl"
+                    style={{ backgroundColor: colors.primary }}
+                  />
+                )}
               </motion.button>
             );
-          })}
+          })()}
+        </div>
+        
+        {/* All Premium Themes */}
+        <div>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>✨</span> Premium Themes
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {themeContext.availableThemes
+              .filter(preset => themePresets[preset].category === 'premium-dark')
+              .map((preset) => {
+                const isActive = themeContext.themePreset === preset;
+                const presetData = themePresets[preset];
+                const colors = presetData.dark;
+                
+                return (
+                  <motion.button
+                    key={preset}
+                    onClick={() => themeContext.changeThemePreset(preset)}
+                    className={`
+                      relative p-6 rounded-2xl border-2 transition-all duration-300 text-left overflow-hidden group
+                      ${isActive 
+                        ? 'border-primary shadow-2xl shadow-primary/50 scale-[1.02] ring-2 ring-primary/20'  
+                        : 'border-slate-700 hover:border-primary/60 hover:shadow-2xl hover:shadow-primary/20'
+                      }
+                      bg-gradient-to-br from-slate-900 to-slate-800
+                    `}
+                    whileHover={{ y: isActive ? 0 : -6, scale: isActive ? 1.02 : 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div 
+                      className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-500"
+                      style={{
+                        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.accent} 100%)`
+                      }}
+                    />
+                    
+                    <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold">
+                      PREMIUM
+                    </div>
+                    
+                    <div className="relative z-10">
+                      <div className="flex gap-3 mb-5">
+                        {[colors.primary, colors.secondary, colors.accent].map((color, i) => (
+                          <div 
+                            key={i}
+                            className="w-12 h-12 rounded-full shadow-2xl border-2 border-white/20 transform group-hover:scale-125 transition-all duration-300"
+                            style={{ 
+                              backgroundColor: color,
+                              boxShadow: `0 0 20px ${color}80`
+                            }}
+                          />
+                        ))}
+                      </div>
+                      
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h3 className="font-heading font-bold text-xl text-white mb-1">
+                            {presetData.name}
+                          </h3>
+                          <p className="text-xs text-slate-400">{presetData.animation} animation</p>
+                        </div>
+                        {isActive && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            className="w-7 h-7 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center shadow-lg"
+                          >
+                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </motion.div>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <motion.div 
+                          className="flex-1 h-3 rounded-full"
+                          style={{ backgroundColor: colors.primary }}
+                          whileHover={{ scaleY: 1.2 }}
+                        />
+                        <motion.div 
+                          className="flex-1 h-3 rounded-full"
+                          style={{ backgroundColor: colors.secondary }}
+                          whileHover={{ scaleY: 1.2 }}
+                        />
+                        <motion.div 
+                          className="flex-1 h-3 rounded-full"
+                          style={{ backgroundColor: colors.accent }}
+                          whileHover={{ scaleY: 1.2 }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {isActive && (
+                      <>
+                        <motion.div 
+                          className="absolute inset-0 rounded-2xl opacity-30 blur-2xl"
+                          style={{ backgroundColor: colors.primary }}
+                          animate={{
+                            opacity: [0.3, 0.5, 0.3],
+                          }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                        <div className="absolute inset-0 rounded-2xl ring-1 ring-white/10" />
+                      </>
+                    )}
+                  </motion.button>
+                );
+              })}
+          </div>
         </div>
       </SettingSection>
 

@@ -109,3 +109,218 @@
 ::-webkit-scrollbar-thumb {
   @apply bg-slate-300 dark:bg-slate-600 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors;
 }
+
+/* === THEME-SPECIFIC ANIMATIONS === */
+
+/* === OCEAN THEME === */
+/* Subtle hover lift only for Ocean */
+[data-theme-animation="wave"] .glass-panel:hover,
+[data-theme-animation="wave"] .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme-animation="wave"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme-animation="wave"] .btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: oceanShimmer 3s infinite;
+}
+
+@keyframes oceanShimmer {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/* === FOREST THEME === */
+/* Subtle hover lift only for Forest */
+[data-theme-animation="drift"] .glass-panel:hover,
+[data-theme-animation="drift"] .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme-animation="drift"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme-animation="drift"] .btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px var(--color-primary);
+}
+
+/* === SUNSET THEME === */
+[data-theme-animation="pulse"] body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, var(--color-accent) 0%, transparent 100%);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Clean hover for Sunset - no glow on cards */
+[data-theme-animation="pulse"] .glass-panel:hover,
+[data-theme-animation="pulse"] .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Button glow only */
+@keyframes sunsetButtonGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 4px 15px var(--color-primary);
+  }
+
+  50% {
+    box-shadow: 0 6px 25px var(--color-primary);
+  }
+}
+
+[data-theme-animation="pulse"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  animation: sunsetButtonGlow 3s ease-in-out infinite;
+}
+
+/* === NEON THEME === */
+/* Scanline effect - more subtle */
+[data-theme-animation="glow"] body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, var(--color-primary) 2px, var(--color-primary) 4px);
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Clean cards with subtle border - no glow animation */
+[data-theme-animation="glow"] .glass-panel,
+[data-theme-animation="glow"] .card {
+  border: 1px solid var(--color-border);
+}
+
+[data-theme-animation="glow"] .glass-panel:hover,
+[data-theme-animation="glow"] .card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Button effects only */
+@keyframes neonButtonGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 15px var(--color-primary);
+  }
+
+  50% {
+    box-shadow: 0 0 25px var(--color-primary);
+  }
+}
+
+[data-theme-animation="glow"] .btn-primary {
+  background: var(--color-primary);
+  border: 2px solid var(--color-secondary);
+  animation: neonButtonGlow 2s ease-in-out infinite;
+}
+
+/* Subtle text glow on headings only - reduced */
+[data-theme-animation="glow"] h1,
+[data-theme-animation="glow"] h2,
+[data-theme-animation="glow"] h3 {
+  text-shadow: 0 0 8px var(--color-primary);
+}
+
+/* === DEFAULT THEME === */
+[data-theme-animation="float"] .glass-panel:hover,
+[data-theme-animation="float"] .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme-animation="float"] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+
+/* === UNIVERSAL ENHANCEMENTS === */
+
+/* Smooth theme transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* Enhanced buttons with theme colors */
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Glass panels with theme-aware backgrounds */
+.glass-panel {
+  background: var(--color-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+/* Cards match theme surface color */
+.card {
+  background: var(--color-surface);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+}
+
+/* Text colors from theme */
+.text-primary {
+  color: var(--color-textPrimary);
+}
+
+.text-secondary {
+  color: var(--color-textSecondary);
+}

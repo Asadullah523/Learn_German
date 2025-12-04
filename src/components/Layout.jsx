@@ -112,11 +112,20 @@ export default function Layout() {
       {/* Particle Background */}
       <ParticleBackground />
       
-      {/* Animated Background Blobs */}
+      {/* Animated Background Blobs - Theme Adaptive */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob opacity-70"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-purple-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 opacity-70"></div>
-        <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 dark:bg-pink-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 opacity-70"></div>
+        <div 
+          className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob opacity-40"
+          style={{ backgroundColor: 'var(--color-primary)' }}
+        ></div>
+        <div 
+          className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-2000 opacity-40"
+          style={{ backgroundColor: 'var(--color-secondary)' }}
+        ></div>
+        <div 
+          className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob animation-delay-4000 opacity-40"
+          style={{ backgroundColor: 'var(--color-accent)' }}
+        ></div>
       </div>
 
       {/* Mobile Header */}
