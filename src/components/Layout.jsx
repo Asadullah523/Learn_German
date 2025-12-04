@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, Trophy, Home, Settings as SettingsIcon, Menu, X } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
 import ThemeToggle from './ThemeToggle';
+import ParticleBackground from './ParticleBackground';
 
 const Sidebar = ({ isOpen, toggle }) => {
   const { progress } = useProgress();
@@ -88,6 +89,14 @@ const Sidebar = ({ isOpen, toggle }) => {
               </div>
             </div>
           </div>
+          
+          {/* Creator Attribution */}
+          <div className="mt-3 text-center">
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Made with ❤️ by{' '}
+              <span className="font-bold text-primary">Asad Ullah</span>
+            </p>
+          </div>
         </div>
       </div>
     </aside>
@@ -100,6 +109,9 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-background text-text-primary transition-colors duration-300 overflow-hidden">
+      {/* Particle Background */}
+      <ParticleBackground />
+      
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl animate-blob opacity-70"></div>

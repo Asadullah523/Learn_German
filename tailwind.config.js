@@ -12,21 +12,22 @@ export default {
                 heading: ['Outfit', 'sans-serif'],
             },
             colors: {
-                // Custom palette mapped to CSS variables for dynamic switching
+                // Custom palette mapped to CSS variables for dynamic theme switching
                 background: 'var(--bg-primary)',
                 surface: 'var(--bg-secondary)',
                 card: 'var(--bg-card)',
                 primary: {
-                    DEFAULT: '#2563EB',
+                    DEFAULT: 'var(--color-primary)',
                     dark: '#1D4ED8',
                     light: '#60A5FA',
                 },
                 secondary: {
-                    DEFAULT: '#64748B',
+                    DEFAULT: 'var(--color-secondary)',
                     dark: '#475569',
                     light: '#94A3B8',
                 },
                 accent: {
+                    DEFAULT: 'var(--color-accent)',
                     rose: '#E11D48',
                     gold: '#D97706',
                     emerald: '#059669',

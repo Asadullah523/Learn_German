@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProgress } from '../context/ProgressContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, themePresets } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
 import { useSoundSettings } from '../context/SoundContext';
 import { 
@@ -21,7 +21,8 @@ import {
 
 export default function Settings() {
   const { resetProgress, progress } = useProgress();
-  const { isDark, toggleTheme } = useTheme();
+  const themeContext = useTheme();
+  const { isDark, toggleTheme } = themeContext;
   const { showToast } = useToast();
   const { soundEnabled, toggleSound } = useSoundSettings();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -80,27 +81,81 @@ export default function Settings() {
 
       <SettingSection title="Appearance">
         <SettingRow 
-          icon={isDark ? Moon : Sun}
+          icon={themeContext.isDark ? Moon : Sun}
           label="Dark Mode"
-          description="Toggle between light and dark themes"
+          description="Switch between light and dark theme"
           action={
             <button 
-              onClick={toggleTheme}
+              onClick={themeContext.toggleTheme}
               className={`
                 relative w-14 h-8 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
-                ${isDark ? 'bg-slate-700' : 'bg-slate-300'}
+                ${themeContext.isDark ? 'bg-slate-700' : 'bg-slate-300'}
               `}
             >
               <motion.div 
                 layout
                 className="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center"
-                animate={{ x: isDark ? 24 : 0 }}
+                animate={{ x: themeContext.isDark ? 24 : 0 }}
               >
-                {isDark ? <Moon size={14} className="text-slate-800" /> : <Sun size={14} className="text-amber-500" />}
+                {themeContext.isDark ? <Moon size={14} className="text-slate-800" /> : <Sun size={14} className="text-amber-500" />}
               </motion.div>
             </button>
           }
         />
+      </SettingSection>
+
+      {/* Theme Presets */}
+      <SettingSection title="Theme Presets">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {themeContext.availableThemes.map((preset) => {
+            const isActive = themeContext.themePreset === preset;
+            const presetData = themePresets[preset];
+            const colors = presetData[themeContext.isDark ? 'dark' : 'light'];
+            
+            return (
+              <motion.button
+                key={preset}
+                onClick={() => themeContext.changeThemePreset(preset)}
+                className={`
+                  relative p-4 rounded-xl border-2 transition-all duration-200
+                  ${isActive 
+                    ? 'border-primary shadow-lg shadow-primary/20 scale-105'  
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                  }
+                `}
+                whileHover={{ scale: isActive ? 1.05 : 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  {/* Color Preview */}
+                  <div className="flex gap-1 mb-2">
+                    <div className="w-6 h-6 rounded-full" style={{ backgroundColor: colors.primary }}></div>
+                    <div className="w-6 h-6 rounded-full" style={{ backgroundColor: colors.secondary }}></div>
+                    <div className="w-6 h-6 rounded-full" style={{ backgroundColor: colors.accent }}></div>
+                  </div>
+                  
+                  {/* Theme Name */}
+                  <span className={`font-bold text-sm ${isActive ? 'text-primary' : 'text-slate-700 dark:text-slate-300'}`}>
+                    {presetData.name}
+                  </span>
+                  
+                  {/* Active Indicator */}
+                  {isActive && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
       </SettingSection>
 
       <SettingSection title="Preferences">

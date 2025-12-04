@@ -5,30 +5,41 @@
 @tailwind utilities;
 
 :root {
-  /* Light Theme */
-  --bg-primary: #F1F5F9;
-  /* Slate 100 - Slightly darker for contrast */
-  --bg-secondary: #FFFFFF;
+  /* Theme preset colors will be injected dynamically by ThemeContext */
+  /* These are fallback values */
+  --color-primary: #2563EB;
+  --color-secondary: #64748B;
+  --color-accent: #E11D48;
+  --color-background: #F1F5F9;
+  --color-surface: #FFFFFF;
+
+  /* Legacy variables for compatibility */
+  --bg-primary: var(--color-background);
+  --bg-secondary: var(--color-surface);
   --bg-card: rgba(255, 255, 255, 0.8);
-  /* More opaque */
 
   --text-primary: #0F172A;
   --text-secondary: #334155;
   --text-muted: #64748B;
   --text-light: #FFFFFF;
 
-  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-  --gradient-accent: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, #1D4ED8 100%);
+  --gradient-accent: linear-gradient(135deg, var(--color-accent) 0%, #BE123C 100%);
   --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
   --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
   --gradient-dark: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
 }
 
 .dark {
-  /* Dark Theme */
-  --bg-primary: #0F172A;
-  /* Deep slate */
-  --bg-secondary: #1E293B;
+  /* Dark mode - theme preset colors will be injected dynamically */
+  --color-primary: #3B82F6;
+  --color-secondary: #94A3B8;
+  --color-accent: #F43F5E;
+  --color-background: #0F172A;
+  --color-surface: #1E293B;
+
+  --bg-primary: var(--color-background);
+  --bg-secondary: var(--color-surface);
   --bg-card: rgba(30, 41, 59, 0.7);
 
   --text-primary: #F8FAFC;
