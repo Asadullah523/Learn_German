@@ -33,12 +33,12 @@ export default function LessonCard({ lesson, unitId, isCompleted, isLocked }) {
   return (
     <Link to={`/learn/${unitId}/${lesson.id}`} className="block group">
       <motion.div 
-        whileHover={{ x: 4, backgroundColor: "rgba(255,255,255,0.8)" }}
+        whileHover={{ x: 4 }}
         className={`
-          flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
+          flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 backdrop-blur-md
           ${isCompleted 
             ? 'bg-green-50/50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30' 
-            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/30 hover:shadow-md'
+            : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:bg-white/10 dark:hover:bg-slate-800/40 hover:border-white/50 dark:hover:border-slate-600 hover:shadow-xl hover:backdrop-blur-xl'
           }
         `}
       >
